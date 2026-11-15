@@ -57,6 +57,7 @@ h1{font-family:var(--display);font-stretch:80%;font-weight:800;font-size:clamp(3
 .ig{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(45deg,#F58529,#DD2A7B,#8134AF);color:#fff;text-decoration:none;font-family:var(--display);font-weight:700;font-size:15px;padding:11px 18px;border-radius:999px;white-space:nowrap}
 .ig:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
 .ig svg{width:18px;height:18px}
+.hotwrap{display:grid;gap:12px;margin:0 0 22px}.hotwrap .hot{margin:0}.hot.alt{background:linear-gradient(120deg,#5B21B6,#1F4E8C)}.hot.alt .go2{color:#5B21B6}
 .hot{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;margin:0 0 22px;padding:16px 18px;border-radius:12px;
   background:linear-gradient(120deg,#D9480F,#B5179E);color:#fff;text-decoration:none;box-shadow:0 6px 18px rgba(217,72,15,.25)}
 .hot .k{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.9}
@@ -76,10 +77,16 @@ h1{font-family:var(--display);font-stretch:80%;font-weight:800;font-size:clamp(3
     <p class="lede">Condensed notes, flashcards, the lecture slides and a click-to-answer Quiz Trainer for five courses. Open a course, read a chapter, then quiz it. Your progress stays in your own browser.</p>
   </header>
 
+  <div class="hotwrap">
   <a class="hot" href="CS313/mock.html">
-    <div><div class="k">🔥 CS313 midterm is tomorrow</div><h2>Take the mock midterm</h2>
-      <p>21 questions in the real 5-part format: sets, proofs, NFA → DFA with ε-closure diagrams, regex, pumping lemma. A 90-minute timer, a reveal button for every answer, and your score as you mark yourself.</p></div>
+    <div><div class="k">🔥 Midterm tomorrow · CS313</div><h2>Theory of Computation mock</h2>
+      <p>21 questions in the real 5-part format: sets, proofs, NFA → DFA with ε-closure diagrams, regex, pumping lemma. Timer, reveal-the-answer, self-marking.</p></div>
     <span class="go2">Start →</span></a>
+  <a class="hot alt" href="CS498/mock.html">
+    <div><div class="k">🔥 Midterm tomorrow · CS498</div><h2>Generative Deep Learning mock</h2>
+      <p>20 tap-to-answer multiple-choice questions, CNN/VAE calculation tables like her slides, open-ended questions. Instant marking and a score.</p></div>
+    <span class="go2">Start →</span></a>
+  </div>
   <ul class="board">
     <li class="row"><div class="gate">CS105</div><div><h2>Advanced Programming (Java)</h2><p class="meta">Dr. K. Oladejo · Savitch, <i>Absolute Java</i> · weeks 1–7</p>
       <div class="tags"><span>18 chapters</span><span>264 quiz questions</span><span>Java exercises with tests</span></div></div>
