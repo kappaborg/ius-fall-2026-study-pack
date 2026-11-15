@@ -2,6 +2,7 @@
    Usage: <script src="../live.js" data-course="CS105"></script>  (hub: data-course="HUB")
    - Presence: every open page joins the Realtime channel "study-pack-live"; the badge shows how many are online.
    - Page views: one call to the rate-limited RPC log_view per page load (the server hashes the IP; no raw IPs).
+     Skipped on devices where the owner switched on "don't count my visits" (localStorage studypack.owner = 1).
    Only the public anon key is here; tables are closed to it and every function is rate-limited server-side. */
 (function () {
   var SB_URL = "https://nkztuwugfppthefuvtdh.supabase.co", SB_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5renR1d3VnZnBwdGhlZnV2dGRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ3NDAzMjEsImV4cCI6MjExMDMxNjMyMX0.Ox5MReU5jrsRbgRnK4c2WDvDhSbIjJQCUoKKg9wxTTY";
@@ -29,7 +30,8 @@
     if (!window.supabase || !window.supabase.createClient) return;
     var sb = window.supabase.createClient(SB_URL, SB_ANON, { auth: { persistSession: false } });
     var page = (location.pathname.split("/").slice(-2).join("/") || "/").replace(/[^A-Za-z0-9/#._-]/g, "").slice(0, 60);
-    sb.rpc("log_view", { p_course: COURSE, p_page: page }).then(function () {}, function () {});
+    var owner = false; try { owner = localStorage.getItem("studypack.owner") === "1"; } catch (e) {}
+    if (!owner) sb.rpc("log_view", { p_course: COURSE, p_page: page }).then(function () {}, function () {});
     var key = Math.random().toString(36).slice(2);
     var ch = sb.channel("study-pack-live", { config: { presence: { key: key } } });
     ch.on("presence", { event: "sync" }, function () {
