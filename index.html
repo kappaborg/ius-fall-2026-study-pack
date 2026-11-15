@@ -67,6 +67,19 @@ h1{font-family:var(--display);font-stretch:80%;font-weight:800;font-size:clamp(3
 .hot:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
 @media (max-width:560px){.hot{grid-template-columns:minmax(0,1fr)}.hot .go2{justify-self:start}}
 @media (prefers-reduced-motion:no-preference){.hot .go2{animation:pulse 2.2s ease-in-out infinite}@keyframes pulse{50%{transform:scale(1.05)}}}
+.exams{margin:0 0 26px}
+.exams h2{font-family:var(--display);font-stretch:85%;font-weight:800;font-size:26px;margin:0 0 4px}
+.exgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:10px}
+.excard{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:4px}
+.excard.done{opacity:.55}
+.excard .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.excard .code{font-family:var(--mono);color:var(--accent);font-size:15px}
+.chip{font-family:var(--mono);font-size:11.5px;border-radius:999px;padding:2px 9px;background:var(--tag);white-space:nowrap}
+.chip.now,.chip.today,.chip.soon{background:#D9480F;color:#fff}.chip.now{background:#B5179E}
+.excard .when{font-family:var(--display);font-weight:700;font-size:17px}
+.excard .rooms{display:flex;flex-wrap:wrap;gap:5px}
+.excard .rooms span{font-family:var(--mono);font-size:12px;border:1px solid var(--line);border-radius:6px;padding:2px 7px}
+.excard .nm{font-size:13.5px;color:var(--muted)}
 </style></head><body>
 
 <div class="wrap">
@@ -77,13 +90,18 @@ h1{font-family:var(--display);font-stretch:80%;font-weight:800;font-size:clamp(3
     <p class="lede">Condensed notes, flashcards, the lecture slides and a click-to-answer Quiz Trainer for five courses. Open a course, read a chapter, then quiz it. Your progress stays in your own browser.</p>
   </header>
 
+  <section class="exams" id="exams">
+    <h2>Midterm exams · where and when</h2>
+    <p class="status">From the official IUS midterm timetable with rooms. "Sports Hall (list 1–109)" means the first 109 students on the class list sit there; check your number with the lecturer or the list at the door.</p>
+    <div class="exgrid" id="exgrid"></div>
+  </section>
   <div class="hotwrap">
   <a class="hot" href="CS313/mock.html">
-    <div><div class="k">🔥 Midterm tomorrow · CS313</div><h2>Theory of Computation mock</h2>
+    <div><div class="k" data-exam="CS313">🔥 CS313 midterm</div><h2>Theory of Computation mock</h2>
       <p>21 questions in the real 5-part format: sets, proofs, NFA → DFA with ε-closure diagrams, regex, pumping lemma. Timer, reveal-the-answer, self-marking.</p></div>
     <span class="go2">Start →</span></a>
   <a class="hot alt" href="CS498/mock.html">
-    <div><div class="k">🔥 Midterm tomorrow · CS498</div><h2>Generative Deep Learning mock</h2>
+    <div><div class="k" data-exam="CS498">🔥 CS498 midterm</div><h2>Generative Deep Learning mock</h2>
       <p>20 tap-to-answer multiple-choice questions, CNN/VAE calculation tables like her slides, open-ended questions. Instant marking and a score.</p></div>
     <span class="go2">Start →</span></a>
   </div>
@@ -154,6 +172,23 @@ const SB_URL="https://nkztuwugfppthefuvtdh.supabase.co", SB_ANON="eyJhbGciOiJIUz
       by[c].map(m=>`<li><span class="wk">${esc(m.week||"")}</span><a href="${esc(m.url)}" target="_blank" rel="noopener">${esc(m.title)}</a><span class="sz">PDF · ${(m.bytes/1e6).toFixed(1)} MB</span></li>`).join("")}</ul></details>`).join("");
     st.textContent=rows.length+" files from the lecturers, opened straight from the course storage. Textbooks are not included.";
   }catch(e){st.textContent="The lecture file list could not be loaded right now. The study sites above still work.";}
+})();
+</script>
+<script src="exams.js"></script>
+<script>
+(function(){
+  const E=window.STUDY_EXAMS||[], st=window.STUDY_EXAM_STATUS, nice=window.STUDY_EXAM_NICE;
+  const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  function draw(){
+    const order=E.map(e=>({e,s:st(e)})).sort((a,b)=>(a.s.k==="done")-(b.s.k==="done")||a.e.date.localeCompare(b.e.date)||a.e.from.localeCompare(b.e.from));
+    document.getElementById("exgrid").innerHTML=order.map(({e,s})=>`<div class="excard ${s.k==="done"?"done":""}">
+      <div class="top"><span class="code">${esc(e.code)}</span><span class="chip ${s.k}">${esc(s.t)}</span></div>
+      <div class="when">${esc(nice(e))}</div><div class="nm">${esc(e.name)} · ${e.students} students</div>
+      <div class="rooms">${e.rooms.map(r=>`<span>📍 ${esc(r)}</span>`).join("")}</div></div>`).join("");
+    document.querySelectorAll("[data-exam]").forEach(el=>{const e=E.find(x=>x.code===el.dataset.exam);if(!e)return;const s=st(e);
+      el.textContent="🔥 "+e.code+" midterm · "+(s.k==="done"?"finished — keep it for the final":s.t+" · "+nice(e).split(" · ")[1]+" · "+e.rooms.join(", "));});
+  }
+  draw(); setInterval(draw,60000);
 })();
 </script>
 <script src="live.js" data-course="HUB"></script>
