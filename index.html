@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://cjrtnc.leaningtech.com; connect-src 'self' https://wandbox.org https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://cjrtnc.leaningtech.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob:; frame-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <title>IUS Fall 2026 Study Pack</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=IBM+Plex+Mono:wght@500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
@@ -47,12 +49,15 @@ h1{font-family:var(--display);font-stretch:80%;font-weight:800;font-size:clamp(3
 .mat .wk{font-family:var(--mono);font-size:11.5px;color:var(--muted);min-width:64px}
 .mat .sz{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
 .mat .status{font-size:14px;color:var(--muted)}
+.live{display:inline-flex;gap:8px;align-items:center;font-family:var(--mono);font-size:13px;color:var(--muted);margin:0}
+.booklist{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:6px;font-size:14.5px}.booklist a{color:var(--accent)}
 </style></head><body>
 
 <div class="wrap">
   <header>
     <div class="eyebrow">International University of Sarajevo · 2026/27 Fall</div>
     <h1>Fall 2026 Study Pack</h1>
+    <p class="live" id="liveInline"><span style="width:8px;height:8px;border-radius:50%;background:#2ecc71;display:inline-block"></span>Connecting…</p>
     <p class="lede">Condensed notes, flashcards, the lecture slides and a click-to-answer Quiz Trainer for five courses. Open a course, read a chapter, then quiz it. Your progress stays in your own browser.</p>
   </header>
 
@@ -80,6 +85,19 @@ h1{font-family:var(--display);font-stretch:80%;font-weight:800;font-size:clamp(3
     <p class="status" id="matStatus">Loading the list of lecture files…</p>
     <div id="matList"></div>
   </section>
+
+  <section class="mat" id="books">
+    <h2>Textbooks</h2>
+    <p class="status">The sites summarise every textbook chapter by chapter. The books themselves come from their official sources:</p>
+    <ul class="booklist">
+      <li><b>CS313</b> · Maheshwari &amp; Smid, <i>Introduction to Theory of Computation</i> — <a href="https://cglab.ca/~michiel/TheoryOfComputation/" target="_blank" rel="noopener">free from the authors</a>; Sipser, <i>Introduction to the Theory of Computation</i> (Cengage)</li>
+      <li><b>CS105</b> · Savitch, <i>Absolute Java</i> (Pearson); Carrano &amp; Henry, <i>Data Structures and Abstractions with Java</i> (Pearson)</li>
+      <li><b>CS498</b> · Foster, <i>Generative Deep Learning</i>, 2nd ed. (O'Reilly) — <a href="https://github.com/davidADSP/Generative_Deep_Learning_2nd_Edition" target="_blank" rel="noopener">the book's code is free on GitHub</a></li>
+      <li><b>MATH204</b> · Epp, <i>Discrete Mathematics with Applications</i>, 5th ed. (Cengage)</li>
+      <li><b>IE408</b> · Meredith &amp; Mantel, <i>Project Management: A Managerial Approach</i> (Wiley)</li>
+    </ul>
+    <p class="status">Check the IUS library and the e-campus course pages for copies.</p>
+  </section>
   <div class="notes">
     <p><b>Textbooks are not included.</b> The notes summarise the books, but the book pages themselves are left out. Use your own copy.</p>
     <p><b>Check against the official course pages.</b> The notes are a study aid written from the slides. Exam dates and grading come from the lecturers and e-campus.</p>
@@ -94,9 +112,9 @@ const SB_URL="https://nkztuwugfppthefuvtdh.supabase.co", SB_ANON="eyJhbGciOiJIUz
   const st=document.getElementById("matStatus"), box=document.getElementById("matList");
   const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
   try{
-    const r=await fetch(SB_URL+"/rest/v1/materials?select=course,title,kind,week,url,bytes&order=sort",{headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON}});
+    const r=await fetch(SB_URL+"/rest/v1/rpc/list_materials",{method:"POST",headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON,"Content-Type":"application/json"},body:"{}"});
     if(!r.ok)throw new Error("HTTP "+r.status);
-    const rows=await r.json(), by={};
+    const res=await r.json(); if(!res.ok)throw new Error(res.error); const rows=res.items, by={};
     rows.forEach(m=>(by[m.course]=by[m.course]||[]).push(m));
     box.innerHTML=Object.keys(by).map(c=>`<details><summary><span class="gate2">${esc(c)}</span>${by[c].length} files</summary><ul>${
       by[c].map(m=>`<li><span class="wk">${esc(m.week||"")}</span><a href="${esc(m.url)}" target="_blank" rel="noopener">${esc(m.title)}</a><span class="sz">PDF · ${(m.bytes/1e6).toFixed(1)} MB</span></li>`).join("")}</ul></details>`).join("");
@@ -104,4 +122,5 @@ const SB_URL="https://nkztuwugfppthefuvtdh.supabase.co", SB_ANON="eyJhbGciOiJIUz
   }catch(e){st.textContent="The lecture file list could not be loaded right now. The study sites above still work.";}
 })();
 </script>
+<script src="live.js" data-course="HUB"></script>
 </body></html>

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://cjrtnc.leaningtech.com; connect-src 'self' https://wandbox.org https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://cjrtnc.leaningtech.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob:; frame-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Study Pack Visitors</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=Archivo:wdth,wght@75..100,600..800&display=swap">
+<style>
+/* Layout: one live number up top, then per-course rows, a 14-day bar strip and the security counters. */
+:root{--bg:#EEF1F4;--panel:#fff;--ink:#16202B;--muted:#5A6676;--line:#CFD6DE;--accent:#1F4E8C;--good:#1E8E4E;--warn:#B5541B;
+  --display:"Archivo","Helvetica Neue",Arial,sans-serif;--mono:"IBM Plex Mono",ui-monospace,Menlo,monospace}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#10161D;--panel:#18212B;--ink:#E6ECF2;--muted:#9AA7B6;--line:#2C3A49;--accent:#7FB0F0;--good:#4CD08A;--warn:#F0A060;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#10161D;--panel:#18212B;--ink:#E6ECF2;--muted:#9AA7B6;--line:#2C3A49;--accent:#7FB0F0;--good:#4CD08A;--warn:#F0A060;color-scheme:dark}
+html,body{margin:0}body{background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,sans-serif}
+.wrap{max-width:820px;margin:0 auto;padding-inline:16px;padding-block:32px 48px;display:grid;gap:18px}
+h1{font-family:var(--display);font-stretch:80%;font-size:clamp(28px,6vw,42px);margin:0}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.big{display:flex;align-items:baseline;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px}
+.big b{font-family:var(--display);font-size:56px;line-height:1;color:var(--good);font-variant-numeric:tabular-nums}
+.dot{width:12px;height:12px;border-radius:50%;background:var(--good);display:inline-block;animation:p 1.6s infinite}
+@keyframes p{50%{opacity:.35}}@media (prefers-reduced-motion:reduce){.dot{animation:none}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}th{font-size:12px;color:var(--muted);font-family:var(--mono);font-weight:500}
+td.n,th.n{text-align:right}
+.bars{display:flex;gap:6px;align-items:flex-end;height:120px;padding-top:8px}
+.bars div{flex:1;background:var(--accent);border-radius:3px 3px 0 0;min-height:2px;position:relative}
+.bars span{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font:11px var(--mono);color:var(--muted);white-space:nowrap}
+.muted{color:var(--muted);font-size:13px}.warn{color:var(--warn);font-weight:600}
+a{color:var(--accent)}
+</style></head><body>
+<div class="wrap">
+  <div><div class="eyebrow">Study pack · owner view</div><h1>Visitors</h1></div>
+  <div class="big"><span class="dot"></span><b id="live">–</b><span id="liveTxt">people online right now</span></div>
+  <div class="card"><table><thead><tr><th>Course</th><th class="n">Online now</th><th class="n">Views 24 h</th><th class="n">Visitors 24 h</th><th class="n">Views 7 d</th><th class="n">Visitors 7 d</th></tr></thead><tbody id="rows"><tr><td colspan="6" class="muted">Loading…</td></tr></tbody></table></div>
+  <div class="card"><div class="eyebrow">Page views per day · last 14 days</div><div class="bars" id="bars"></div><div style="height:18px"></div></div>
+  <div class="card"><div class="eyebrow">Security · last 24 h</div><p id="sec" class="muted">Loading…</p>
+    <p class="muted">Blocked requests: inputs that failed validation (for example SQL-injection attempts) and callers that went over the per-minute limit. Visitors are counted by a hashed IP; raw IPs are never stored.</p></div>
+  <p class="muted"><a href="index.html">← Study pack</a> · refreshes every 30 seconds</p>
+</div>
+<script src="live.js" data-course="HUB"></script>
+<script>
+const COURSES=["HUB","CS105","CS313","CS498","MATH204","IE408"];
+let stats=null;
+function esc(t){return String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function render(){
+  const L=window.STUDY_LIVE||{total:0,byCourse:{}};
+  document.getElementById("live").textContent=L.total; document.getElementById("liveTxt").textContent=(L.total===1?"person":"people")+" online right now";
+  const by={};(stats&&stats.courses||[]).forEach(c=>by[c.course]=c);
+  document.getElementById("rows").innerHTML=COURSES.map(c=>{const s=by[c]||{};return `<tr><td>${c==="HUB"?"Landing page":esc(c)}</td><td class="n">${L.byCourse[c]||0}</td><td class="n">${s.views_24h||0}</td><td class="n">${s.visitors_24h||0}</td><td class="n">${s.views_7d||0}</td><td class="n">${s.visitors_7d||0}</td></tr>`}).join("");
+  const d=(stats&&stats.daily)||[], max=Math.max(1,...d.map(x=>x.views));
+  document.getElementById("bars").innerHTML=d.length?d.map(x=>`<div style="height:${Math.round(100*x.views/max)}%" title="${esc(x.day)}: ${x.views} views, ${x.visitors} visitors"><span>${esc(String(x.day).slice(5))}</span></div>`).join(""):'<p class="muted">No views yet.</p>';
+  const sec=(stats&&stats.security)||[];
+  document.getElementById("sec").innerHTML=sec.length?sec.map(s=>`<span class="warn">${s.events_24h}</span> ${s.kind==="bad_input"?"rejected inputs":"rate-limit blocks"} from ${s.sources_24h} source${s.sources_24h==1?"":"s"}`).join(" · "):"No blocked requests in the last 24 hours.";
+}
+async function load(){
+  const sb=window.STUDY_LIVE&&window.STUDY_LIVE.client; if(!sb){setTimeout(load,500);return;}
+  const {data}=await sb.rpc("view_stats"); if(data&&data.ok)stats=data; render();
+}
+(window.STUDY_LIVE||{listeners:[]}).listeners.push(render);
+load(); setInterval(load,30000);
+</script>
+</body></html>

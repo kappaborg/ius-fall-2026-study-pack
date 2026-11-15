@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' https://cdn.jsdelivr.net https://cjrtnc.leaningtech.com; connect-src 'self' https://wandbox.org https://*.supabase.co wss://*.supabase.co https://cdn.jsdelivr.net https://cjrtnc.leaningtech.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob:; frame-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'none'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Quiz Trainer</title>
@@ -84,7 +86,7 @@ textarea{width:100%;min-height:200px;font:12.5px/1.45 ui-monospace,Menlo,monospa
 </style>
 </head>
 <body>
-<a href="index.html" style="position:fixed;left:14px;bottom:14px;z-index:50;background:#24549C;color:#fff;padding:8px 13px;border-radius:999px;font:600 13px system-ui,sans-serif;text-decoration:none">← Study site</a>
+<a href="index.html" style="position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:50;background:#24549C;color:#fff;padding:8px 13px;border-radius:999px;font:600 13px system-ui,sans-serif;text-decoration:none">← Study site</a><a href="../index.html" title="All courses" style="position:fixed;left:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:50;background:#16202B;color:#fff;padding:9px 14px;border-radius:999px;font:600 13px system-ui,sans-serif;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.25)">⌂ All courses</a>
 <div class="wrap">
   <header>
     <div>
@@ -594,5 +596,6 @@ document.addEventListener("keydown", e => {
 });
 theme(); render();
 </script>
+<script src="../live.js" data-course="CS105"></script>
 </body>
 </html>
