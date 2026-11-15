@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Quiz Trainer</title>
+<style>
+:root{
+  --surface:#F5F7F9; --card:#FFFFFF; --ink:#1D242E; --muted:#5B6675;
+  --line:#D6DCE3; --line-strong:#AEB8C4;
+  --dye:#24549C; --dye-ink:#FFFFFF; --dye-soft:#E3EBF7;
+  --good:#2F7D48; --good-soft:#E5F1E9; --bad:#B23A3A; --bad-soft:#F8E5E5; --warn:#C77E1D; --warn-soft:#F7EEDD;
+  --shadow:0 1px 3px rgba(29,36,46,.08),0 4px 14px rgba(29,36,46,.06);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --surface:#14181E; --card:#1B222B; --ink:#E5EAF1; --muted:#93A0B0;
+  --line:#2B3441; --line-strong:#3D4956;
+  --dye:#4E86DE; --dye-ink:#0E1524; --dye-soft:#1E2C42;
+  --good:#5CA877; --good-soft:#1D2E24; --bad:#E07070; --bad-soft:#3A2224; --warn:#D89A45; --warn-soft:#33291A;
+  --shadow:0 1px 3px rgba(0,0,0,.4);
+}}
+:root[data-theme="dark"]{
+  --surface:#14181E; --card:#1B222B; --ink:#E5EAF1; --muted:#93A0B0;
+  --line:#2B3441; --line-strong:#3D4956;
+  --dye:#4E86DE; --dye-ink:#0E1524; --dye-soft:#1E2C42;
+  --good:#5CA877; --good-soft:#1D2E24; --bad:#E07070; --bad-soft:#3A2224; --warn:#D89A45; --warn-soft:#33291A;
+  --shadow:0 1px 3px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--surface);color:var(--ink)}
+body{font:15px/1.55 "Avenir Next","Segoe UI",-apple-system,BlinkMacSystemFont,sans-serif}
+.disp{font-family:"Avenir Next Condensed","Arial Narrow","Avenir Next",sans-serif;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+button{font:inherit;cursor:pointer;color:inherit;background:none;border:none}
+a{color:var(--dye)}
+.wrap{max-width:980px;margin:0 auto;padding:18px 16px 60px}
+header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+header .disp{font-size:20px}
+header nav{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+.tab{padding:7px 12px;border-radius:8px;border:1px solid var(--line);background:var(--card);font-size:13.5px}
+.tab.on{background:var(--dye);color:var(--dye-ink);border-color:var(--dye)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:var(--shadow);margin-bottom:14px}
+.muted{color:var(--muted)} .small{font-size:12.5px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.btn{padding:8px 13px;border-radius:8px;border:1px solid var(--line-strong);background:var(--card);font-size:13.5px}
+.btn:hover{border-color:var(--dye)}
+.btn.pri{background:var(--dye);color:var(--dye-ink);border-color:var(--dye)}
+.btn:disabled{opacity:.45;cursor:default}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.bar{height:8px;border-radius:5px;background:var(--line);overflow:hidden;display:flex}
+.bar i{display:block;height:100%}
+.pill{display:inline-block;font-size:11.5px;padding:2px 8px;border-radius:20px;border:1px solid var(--line);color:var(--muted)}
+.pill.good{background:var(--good-soft);color:var(--good);border-color:transparent}
+.pill.bad{background:var(--bad-soft);color:var(--bad);border-color:transparent}
+.pill.warn{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+.pill.dye{background:var(--dye-soft);color:var(--dye);border-color:transparent}
+h2{font-size:17px;margin:0 0 8px} h3{font-size:15px;margin:14px 0 6px}
+.chk{display:inline-flex;gap:6px;align-items:center;padding:5px 10px;border:1px solid var(--line);border-radius:20px;font-size:13px;cursor:pointer;user-select:none}
+.chk input{margin:0}
+/* question */
+.qhead{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.qtext{font-size:17px;line-height:1.5;margin:4px 0 14px;white-space:pre-wrap}
+.opt{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;padding:12px 14px;margin-bottom:8px;border:1.5px solid var(--line);border-radius:10px;background:var(--card);font-size:15px}
+.opt:hover:not(:disabled){border-color:var(--dye)}
+.opt .k{font-weight:700;min-width:22px;color:var(--muted)}
+.opt.pick{border-color:var(--dye);background:var(--dye-soft)}
+.opt.right{border-color:var(--good);background:var(--good-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt:disabled{cursor:default}
+.yn{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.yn .opt{justify-content:center;font-size:17px;font-weight:600}
+.fb{border-left:4px solid var(--line-strong);padding:10px 12px;border-radius:6px;background:var(--surface);margin-top:6px}
+.fb.ok{border-color:var(--good)} .fb.no{border-color:var(--bad)}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:12px}
+pre.tbl{font:14px/1.45 ui-monospace,"SF Mono",Menlo,Consolas,monospace;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin:8px 0;overflow-x:auto;white-space:pre}
+.big{font-size:38px;font-weight:700;line-height:1.1}
+.plan li{margin-bottom:10px}
+code,.mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:12.5px}
+textarea{width:100%;min-height:200px;font:12.5px/1.45 ui-monospace,Menlo,monospace;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:10px}
+.tblwrap{overflow-x:auto}
+@media (max-width:600px){.qtext{font-size:16px}.big{font-size:30px}header nav{margin-left:0}}
+</style>
+</head>
+<body>
+<a href="index.html" style="position:fixed;left:14px;bottom:14px;z-index:50;background:#24549C;color:#fff;padding:8px 13px;border-radius:999px;font:600 13px system-ui,sans-serif;text-decoration:none">← Study site</a>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="disp" id="ttl">Quiz Trainer</div>
+      <div class="small muted" id="sub">one chapter per lecture · progress saved in this browser</div>
+    </div>
+    <nav id="nav"></nav>
+  </header>
+  <main id="app"></main>
+</div>
+<script src="quiz-data.js"></script>
+<script>
+"use strict";
+const D = window.QUIZ || {chapters:[],questions:[]};
+const C = Object.assign({code: "CS498", key: "cs498.quiz.v1", sub: "", prof: "★ professor's question", who: "the professor's", exams: []}, D.course || {});
+const WHO = C.who, WHO1 = WHO[0].toUpperCase() + WHO.slice(1);
+const KEY = C.key;
+document.title = C.code + " Quiz Trainer"; document.getElementById("ttl").textContent = C.code + " Quiz Trainer";
+if (C.sub) document.getElementById("sub").textContent = C.sub;
+const BIN = t => t === "yn" || t === "tf";
+const QBY = {}; D.questions.forEach(q => QBY[q.id] = q);
+const CHBY = {}; D.chapters.forEach(c => CHBY[c.id] = c);
+const LET = ["A","B","C","D","E"];
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+// Lines that are aligned with runs of spaces (transition tables, truth tables) render in a monospace block.
+const tabular = l => /\S {2,}\S/.test(l) || /^ {2,}\S/.test(l);
+function fmtQ(t){
+  const out = [], lines = String(t).split("\n");
+  for (let i = 0; i < lines.length;) {
+    if (tabular(lines[i]) && i + 1 < lines.length && (tabular(lines[i + 1]) || /^[→∗*]/.test(lines[i + 1]))) {
+      const blk = []; while (i < lines.length && (tabular(lines[i]) || /^[→∗*]/.test(lines[i]))) blk.push(lines[i++]);
+      out.push(`<pre class="tbl">${esc(blk.join("\n"))}</pre>`);
+    } else out.push(esc(lines[i++]) + "\n");
+  }
+  return out.join("").replace(/\n(<pre)/g, "$1").replace(/\n$/, "");
+}
+const pct = (a,b) => b ? Math.round(100*a/b) : 0;
+
+// ---------- state ----------
+function blank(){ return {q:{}, sessions:[], settings:{feedback:"instant", size:15}}; }
+let S = blank();
+try { const raw = localStorage.getItem(KEY); if (raw) S = Object.assign(blank(), JSON.parse(raw)); } catch(e) {}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e) {} }
+const st = id => S.q[id] || {seen:0, right:0, wrong:0, box:0, hist:[], last:0};
+
+// Leitner box 0 = unseen, 1 = just missed … 5 = answered right 5 times running.
+function record(id, ok){
+  const r = st(id);
+  r.seen++; ok ? r.right++ : r.wrong++;
+  r.box = ok ? Math.min(5, (r.box || 1) + 1) : 1;
+  r.hist = (r.hist || []).concat(ok ? 1 : 0).slice(-10);
+  r.last = Date.now();
+  S.q[id] = r;
+}
+const mastery = id => (st(id).box || 0) / 5;          // 0 … 1
+const mastered = id => (st(id).box || 0) >= 3;
+
+function groupStats(ids){
+  let seen = 0, att = 0, right = 0, m = 0, mast = 0, recentR = 0, recentN = 0;
+  ids.forEach(id => {
+    const r = st(id);
+    if (r.seen) { seen++; att += r.seen; right += r.right; }
+    m += mastery(id); if (mastered(id)) mast++;
+    (r.hist || []).slice(-3).forEach(h => { recentN++; recentR += h; });
+  });
+  return {n: ids.length, seen, att, right, acc: att ? right/att : null, recent: recentN ? recentR/recentN : null,
+          mastery: ids.length ? m/ids.length : 0, mastered: mast};
+}
+const chIds = cid => D.questions.filter(q => q.chapter === cid).map(q => q.id);
+const topicIds = (cid, t) => D.questions.filter(q => q.chapter === cid && q.topic === t).map(q => q.id);
+
+function status(g){
+  if (g.seen === 0) return ["Not started", ""];
+  if (g.seen < g.n * 0.5) return ["In progress", "dye"];
+  const a = g.recent ?? g.acc;
+  if (g.mastery >= 0.8 && a >= 0.85) return ["Mastered", "good"];
+  if (a >= 0.8 && g.mastery >= 0.55) return ["Solid", "good"];
+  if (a >= 0.6) return ["Shaky", "warn"];
+  return ["Weak", "bad"];
+}
+function daysTo(iso){ return Math.ceil((new Date(iso + "T09:00:00") - new Date()) / 86400000); }
+const FOCUS = (() => {
+  let ex = (C.exams || []).filter(e => D.chapters.some(c => c.exam === e.name));
+  if (!ex.length) ex = [...new Set(D.chapters.map(c => c.exam))].map(n => ({name: n, date: (D.chapters.find(c => c.exam === n) || {}).date}));
+  ex.sort((a, b) => (a.date || "9") < (b.date || "9") ? -1 : 1);
+  return ex.find(e => !e.date || daysTo(e.date) >= 0) || ex[ex.length - 1] || {name: "Exam"};
+})();
+
+// ---------- question picking ----------
+function shuffle(a){ a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function priority(id){
+  const r = st(id), box = r.box || 0;
+  let p = [1.0, 1.4, 0.9, 0.45, 0.2, 0.08][box];
+  if (r.hist && r.hist.length && !r.hist[r.hist.length - 1]) p += 0.6;
+  const hours = r.last ? (Date.now() - r.last) / 3.6e6 : 999;
+  if (hours < 0.25 && box >= 2) p *= 0.3;              // just seen and known: rest it
+  return p * (0.75 + Math.random() * 0.5);
+}
+function pick(ids, mode, size){
+  let pool = ids.slice();
+  if (mode === "new") pool = pool.filter(id => !st(id).seen);
+  if (mode === "mistakes") pool = pool.filter(id => { const h = st(id).hist || []; return st(id).wrong && (h[h.length-1] === 0 || (st(id).box || 0) < 3); });
+  if (mode === "all") return shuffle(pool).slice(0, size || pool.length);
+  pool.sort((a, b) => priority(b) - priority(a));
+  return shuffle(pool.slice(0, size || pool.length));
+}
+// Mixed exam simulation: spread across the exam's chapters by relevance weight
+function simulation(exam, size){
+  const chs = D.chapters.filter(c => c.exam === exam);
+  const W = chs.reduce((s, c) => s + c.w, 0);
+  let out = [];
+  chs.forEach(c => { const k = Math.max(1, Math.round(size * c.w / W)); out = out.concat(shuffle(chIds(c.id)).slice(0, k)); });
+  return shuffle(out).slice(0, size);
+}
+
+// Her own slide questions and the look-alikes written to mirror them (q.twin = id of her question)
+const PROF = D.questions.filter(q => q.origin === "professor").map(q => q.id);
+const TWINS = D.questions.filter(q => q.twin && QBY[q.twin]).map(q => q.id);
+// Her-style exam: one question per question of hers — either hers or one of its look-alikes, at random
+function herStyle(size){
+  const fam = {}; PROF.forEach(id => fam[id] = [id]);
+  TWINS.forEach(id => fam[QBY[id].twin].push(id));
+  const fav = PROF.filter(id => CHBY[QBY[id].chapter].exam === FOCUS.name);
+  return shuffle(fav.length ? fav : PROF).slice(0, size).map(id => fam[id][Math.floor(Math.random() * fam[id].length)]);
+}
+
+// ---------- session ----------
+let R = null;   // running session
+function start(ids, label, opts = {}){
+  if (!ids.length) { alertBox("No questions match that choice yet."); return; }
+  R = {label, ids, i: 0, order: {}, picks: {}, done: {}, t0: Date.now(),
+       feedback: opts.feedback || S.settings.feedback, kind: opts.kind || "practice"};
+  ids.forEach(id => { const q = QBY[id]; R.order[id] = (BIN(q.type) || q.fixed) ? q.options.map((_, k) => k) : shuffle(q.options.map((_, k) => k)); });
+  go("#run");
+}
+function answer(k){
+  const id = R.ids[R.i];
+  if (R.feedback === "instant") {
+    if (R.done[id]) return;
+    R.picks[id] = k; R.done[id] = true;
+    record(id, k === QBY[id].answer); save();
+  } else {
+    R.picks[id] = k;
+  }
+  render();
+}
+function next(){
+  if (R.i < R.ids.length - 1) { R.i++; render(); window.scrollTo(0, 0); }
+  else finish();
+}
+function finish(){
+  if (R.feedback === "end") R.ids.forEach(id => { if (R.picks[id] !== undefined) record(id, R.picks[id] === QBY[id].answer); });
+  const answered = R.ids.filter(id => R.picks[id] !== undefined);
+  const per = {}, perT = {};
+  answered.forEach(id => {
+    const q = QBY[id], ok = R.picks[id] === q.answer;
+    (per[q.chapter] = per[q.chapter] || {n:0, r:0}).n++; if (ok) per[q.chapter].r++;
+    const tk = q.chapter + "|" + q.topic; (perT[tk] = perT[tk] || {n:0, r:0}).n++; if (ok) perT[tk].r++;
+  });
+  const right = answered.filter(id => R.picks[id] === QBY[id].answer).length;
+  const sess = {t: Date.now(), label: R.label, kind: R.kind, n: answered.length, r: right, sec: Math.round((Date.now() - R.t0) / 1000), per, perT,
+                wrong: answered.filter(id => R.picks[id] !== QBY[id].answer)};
+  if (answered.length) { S.sessions.push(sess); S.sessions = S.sessions.slice(-200); }
+  save();
+  R.result = sess; R.finished = true;
+  go("#result");
+}
+
+// ---------- analysis / study planner ----------
+function topicTable(){
+  const rows = [];
+  D.chapters.forEach(c => c.topics.forEach(t => {
+    const ids = topicIds(c.id, t), g = groupStats(ids);
+    const missed = ids.filter(id => st(id).wrong).sort((a, b) => st(b).wrong - st(a).wrong);
+    const acc = g.recent ?? g.acc;
+    const urgency = c.exam === FOCUS.name ? 1 : 0.35;
+    // weakness: lack of mastery, plus a penalty for questions that are actually being missed
+    const weak = (1 - g.mastery) * 0.6 + (acc === null ? 0.35 : (1 - acc) * 0.8);
+    rows.push({c, t, ids, g, acc, missed, score: weak * c.w * urgency});
+  }));
+  return rows;
+}
+function studyPointers(ids){
+  const m = {};
+  ids.forEach(id => { const s = QBY[id].study; m[s] = (m[s] || 0) + 1 + 2 * st(id).wrong; });
+  return Object.entries(m).sort((a, b) => b[1] - a[1]).map(x => x[0]);
+}
+function plan(){
+  const rows = topicTable();
+  const touched = rows.filter(r => r.g.seen > 0);
+  const list = rows.slice().sort((a, b) => b.score - a.score).filter(r => r.score > 0.12).slice(0, 6);
+  return {rows, touched, list};
+}
+function verdict(){
+  const q1 = D.chapters.filter(c => c.exam === FOCUS.name);
+  const ids = q1.flatMap(c => chIds(c.id)), g = groupStats(ids);
+  if (!g.seen) return {txt: `No answers yet — start with a ${FOCUS.name} simulation to get a baseline.`, score: null, g};
+  // readiness = how likely you are to get a random Quiz 1 question right: recent accuracy where known,
+  // shrunk towards 25 % (guessing) for questions never seen
+  let est = 0, W = 0;
+  q1.forEach(c => chIds(c.id).forEach(id => {
+    const r = st(id); const h = r.hist || [];
+    const p = h.length ? (0.25 + 0.75 * (h.slice(-3).reduce((a, b) => a + b, 0) / Math.min(3, h.length)) * (0.6 + 0.4 * mastery(id))) : 0.35;
+    est += p * c.w; W += c.w;
+  }));
+  const score = est / W;
+  const txt = score >= 0.9 ? "Ready. Keep the streak alive with one smart review before the quiz."
+    : score >= 0.75 ? "Close. A couple of focused drills on the weak topics below will get you over 90 %."
+    : score >= 0.5 ? "Halfway. Work through the study plan top to bottom — read, then drill each topic."
+    : "Early days. Cover every chapter once (New questions), then follow the plan.";
+  return {txt, score, g};
+}
+function report(){
+  const L = [];
+  const v = verdict();
+  L.push(`${C.code} quiz trainer report — ${new Date().toISOString().slice(0, 16).replace("T", " ")}`);
+  L.push(`Bank: ${D.questions.length} questions, ${D.chapters.length} chapters (built ${D.built}). Sessions done: ${S.sessions.length}.`);
+  if (v.score !== null) L.push(`Estimated ${FOCUS.name} score: ${Math.round(v.score * 100)} %`);
+  L.push("", "CHAPTERS (seen/total · accuracy all-time · last-3 accuracy · mastered):");
+  D.chapters.forEach(c => { const g = groupStats(chIds(c.id));
+    L.push(`- ${c.short} [${c.exam}]: ${g.seen}/${g.n} · ${g.acc === null ? "–" : pct(g.acc * g.att, g.att) + "%"} · ${g.recent === null ? "–" : Math.round(g.recent * 100) + "%"} · ${g.mastered} mastered · ${status(g)[0]}`); });
+  const hg = herGap();
+  if (hg && (hg.gp.seen || hg.gt.seen)) {
+    L.push("", `${WHO1.toUpperCase()} QUESTIONS vs LOOK-ALIKES: originals ${hg.gp.seen}/${hg.gp.n} seen, ${hg.gp.acc === null ? "–" : Math.round(hg.gp.acc * 100) + "%"} right · look-alikes ${hg.gt.seen}/${hg.gt.n} seen, ${hg.gt.acc === null ? "–" : Math.round(hg.gt.acc * 100) + "%"} right`);
+    hg.memo.forEach(id => L.push(`- right on original ${id} but missed a look-alike: ${QBY[id].q.slice(0, 100)}`));
+  }
+  L.push("", "TOPICS (weakest first, seen only):");
+  plan().rows.filter(r => r.g.seen).sort((a, b) => (a.acc ?? 1) - (b.acc ?? 1)).forEach(r =>
+    L.push(`- ${r.c.short} / ${r.t}: ${r.g.seen}/${r.g.n} seen, accuracy ${Math.round((r.acc ?? 0) * 100)}%`));
+  const missed = Object.keys(S.q).filter(id => QBY[id] && S.q[id].wrong).sort((a, b) => S.q[b].wrong - S.q[a].wrong).slice(0, 25);
+  if (missed.length) {
+    L.push("", "MOST-MISSED QUESTIONS (id · times wrong/right · question → correct answer):");
+    missed.forEach(id => { const q = QBY[id], r = S.q[id];
+      L.push(`- ${id} · ${r.wrong}✗/${r.right}✓ · ${q.q.slice(0, 120)} → ${q.options[q.answer]}`); });
+  }
+  L.push("", "RECENT SESSIONS:");
+  S.sessions.slice(-8).forEach(s => L.push(`- ${new Date(s.t).toISOString().slice(0, 16).replace("T", " ")} ${s.label}: ${s.r}/${s.n} (${pct(s.r, s.n)}%) in ${Math.round(s.sec / 60)} min`));
+  L.push("", "Please analyse this: what am I getting wrong and why, what should I re-read (study/ files), and quiz me on my weakest topics.");
+  return L.join("\n");
+}
+
+// ---------- views ----------
+const app = document.getElementById("app");
+function go(h){ if (location.hash === h) render(); else location.hash = h; }
+window.addEventListener("hashchange", render);
+function alertBox(msg){ const d = document.createElement("div"); d.className = "card"; d.style.borderColor = "var(--warn)"; d.textContent = msg; app.prepend(d); setTimeout(() => d.remove(), 3500); }
+
+function nav(){
+  const h = location.hash || "#home";
+  const tabs = [["#home", "Chapters"], ["#analysis", "My analysis"], ["#history", "History"], ["#settings", "Settings"]];
+  if (R && !R.finished) tabs.splice(1, 0, ["#run", "▶ Resume"]);
+  document.getElementById("nav").innerHTML = tabs.map(([k, t]) => `<a class="tab ${h === k ? "on" : ""}" href="${k}" style="text-decoration:none;color:inherit">${t}</a>`).join("")
+    + `<a class="tab" href="index.html" style="text-decoration:none;color:inherit">← Study site</a>`;
+}
+function bar(g){
+  const m = Math.round(g.mastery * 100), s = Math.round(100 * g.seen / (g.n || 1));
+  return `<div class="bar" title="mastery ${m}% · seen ${s}%"><i style="width:${m}%;background:var(--good)"></i><i style="width:${Math.max(0, s - m)}%;background:var(--line-strong)"></i></div>`;
+}
+
+function viewHome(){
+  const v = verdict();
+  const d = FOCUS.date ? daysTo(FOCUS.date) : null;
+  let h = `<div class="card"><div class="row" style="justify-content:space-between;align-items:flex-start">
+    <div style="flex:1;min-width:240px"><h2>${esc(FOCUS.name)}${FOCUS.when ? " · " + esc(FOCUS.when) : ""}</h2>${FOCUS.scope ? `<div class="small" style="margin-bottom:4px">${esc(FOCUS.scope)}</div>` : ""}
+      <div class="muted small">${d === null ? "" : d > 0 ? `in ${d} day${d > 1 ? "s" : ""}` : d === 0 ? "today" : "done — keep using it for the next exam"} · ${D.questions.length} questions in the bank</div>
+      <p style="margin:10px 0 0">${esc(v.txt)}</p></div>
+    <div style="text-align:right"><div class="big">${v.score === null ? "–" : Math.round(v.score * 100) + "%"}</div><div class="small muted">estimated score</div></div></div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn pri" data-sim="${esc(FOCUS.name)}">▶ ${esc(FOCUS.name)} simulation (20 Q, mixed)</button>
+      <button class="btn" data-smart="all">Smart review (15 Q, weakest first)</button>
+      <button class="btn" data-mist="all">All my mistakes</button>
+    </div></div>`;
+  if (PROF.length) {
+    const gp = groupStats(PROF), gt = groupStats(TWINS);
+    const line = (g, what) => `${g.seen}/${g.n} ${what} seen${g.acc === null ? "" : ` · ${Math.round(g.acc * 100)}% right`}`;
+    h += `<div class="card"><h2>★ ${esc(WHO1)} own questions</h2>
+      <div class="small muted">${line(gp, `of ${WHO} questions`)}${TWINS.length ? " · " + line(gt, "look-alikes") : ""}</div>
+      <p class="small" style="margin:6px 0 10px">${esc(WHO1)} own questions from the slides and past papers${TWINS.length ? `, plus look-alikes that copy their wording and traps with a different twist (flipped Yes/No, new numbers, the converse). If you get the originals right but the look-alikes wrong, you memorised the answer instead of understanding it` : ""}.</p>
+      <div class="row">
+        <button class="btn pri" data-her="exam">▶ Exam in ${esc(WHO)} style (20 Q)</button>
+        <button class="btn" data-her="hers">${esc(WHO1)} ${PROF.length} questions</button>
+        ${TWINS.length ? `<button class="btn" data-her="twins">Look-alikes (${TWINS.length})</button><button class="btn" data-her="mix">Originals + look-alikes (smart ${S.settings.size})</button>` : ""}
+      </div></div>`;
+  }
+  h += `<div class="grid">` + D.chapters.map(c => {
+    const g = groupStats(chIds(c.id)), [stx, cls] = status(g);
+    return `<div class="card" style="margin:0">
+      <div class="row" style="justify-content:space-between"><span class="pill ${c.exam === FOCUS.name ? "dye" : ""}">${esc(c.exam)}</span><span class="pill ${cls}">${stx}</span></div>
+      <h2 style="margin-top:8px">${esc(c.title)}</h2>
+      <div class="small muted">${g.n} questions · ${g.seen} seen · ${g.mastered} mastered${g.acc === null ? "" : ` · ${Math.round(g.acc * 100)}% right`}</div>
+      <div style="margin:8px 0 10px">${bar(g)}</div>
+      <div class="row">
+        <button class="btn pri" data-ch="${c.id}" data-mode="smart">Practice</button>
+        <button class="btn" data-ch="${c.id}" data-mode="new" ${g.seen >= g.n ? "disabled" : ""}>New (${g.n - g.seen})</button>
+        <button class="btn" data-ch="${c.id}" data-mode="mistakes">Mistakes</button>
+        <button class="btn" data-ch="${c.id}" data-mode="all">All ${g.n}</button>
+      </div>
+      <details style="margin-top:10px"><summary class="small muted" style="cursor:pointer">Topics</summary>
+        <table style="margin-top:6px">${c.topics.map(t => { const tg = groupStats(topicIds(c.id, t));
+          return `<tr><td>${esc(t)}</td><td class="small muted" style="white-space:nowrap">${tg.seen}/${tg.n}${tg.acc === null ? "" : " · " + Math.round(tg.acc * 100) + "%"}</td>
+          <td><button class="btn small" style="padding:3px 8px" data-topic="${esc(c.id + "|" + t)}">Drill</button></td></tr>`; }).join("")}</table></details>
+    </div>`;
+  }).join("") + `</div>
+  <p class="small muted">Practice = smart mix (unseen and missed first). The bar is green for mastered (answered right 3+ times in a row), grey for seen. Options are shuffled every time, so you learn the answer, not its letter. Keys: 1–4 or A–D, Y/N or T/F, Enter = next.</p>`;
+  app.innerHTML = h;
+  app.querySelectorAll("[data-ch]").forEach(b => b.onclick = () => {
+    const c = CHBY[b.dataset.ch], m = b.dataset.mode, ids = chIds(c.id);
+    const size = m === "all" ? ids.length : S.settings.size;
+    start(pick(ids, m === "smart" ? "smart" : m, size), `${c.short} · ${({smart: "practice", new: "new questions", mistakes: "mistakes", all: "all questions"})[m]}`);
+  });
+  app.querySelectorAll("[data-topic]").forEach(b => b.onclick = () => { const [cid, t] = b.dataset.topic.split("|");
+    start(pick(topicIds(cid, t), "all"), `${CHBY[cid].short} · ${t}`); });
+  app.querySelectorAll("[data-sim]").forEach(b => b.onclick = () => start(simulation(b.dataset.sim, 20), b.dataset.sim + " simulation", {feedback: "end", kind: "simulation"}));
+  app.querySelectorAll("[data-smart]").forEach(b => b.onclick = () => start(pick(D.questions.map(q => q.id), "smart", S.settings.size), "Smart review"));
+  app.querySelectorAll("[data-mist]").forEach(b => b.onclick = () => start(pick(D.questions.map(q => q.id), "mistakes", 40), "My mistakes"));
+  app.querySelectorAll("[data-her]").forEach(b => b.onclick = () => ({
+    exam: () => start(herStyle(20), "Exam in " + WHO + " style", {feedback: "end", kind: "simulation"}),
+    hers: () => start(pick(PROF, "all"), WHO1 + " questions"),
+    twins: () => start(pick(TWINS, "smart", S.settings.size), "Look-alikes"),
+    mix: () => start(pick(PROF.concat(TWINS), "smart", S.settings.size), "Originals + look-alikes"),
+  })[b.dataset.her]());
+}
+
+function viewRun(){
+  if (!R) { go("#home"); return; }
+  if (R.finished) { go("#result"); return; }
+  const id = R.ids[R.i], q = QBY[id], c = CHBY[q.chapter];
+  const picked = R.picks[id], shown = R.feedback === "instant" && R.done[id];
+  const order = R.order[id];
+  const optHtml = order.map((k, pos) => {
+    let cls = "";
+    if (shown) { if (k === q.answer) cls = "right"; else if (k === picked) cls = "wrong"; }
+    else if (k === picked) cls = "pick";
+    const key = BIN(q.type) ? "" : `<span class="k">${LET[pos]}</span>`;
+    return `<button class="opt ${cls}" data-k="${k}" ${shown ? "disabled" : ""}>${key}<span>${esc(q.options[k])}</span></button>`;
+  }).join("");
+  const r = st(id);
+  let fb = "";
+  if (shown) {
+    const ok = picked === q.answer;
+    fb = `<div class="fb ${ok ? "ok" : "no"}"><b>${ok ? "✓ Correct" : "✗ Not quite — the answer is " + (BIN(q.type) ? q.options[q.answer] : LET[order.indexOf(q.answer)] + ") " + esc(q.options[q.answer]))}</b>
+      <div style="margin-top:4px">${esc(q.why)}</div>
+      ${q.twin && QBY[q.twin] ? `<div class="small" style="margin-top:6px"><b>The original:</b> ${esc(QBY[q.twin].q)} → <b>${esc(QBY[q.twin].options[QBY[q.twin].answer])}</b></div>` : ""}
+      <div class="small muted" style="margin-top:6px">Source: ${esc(q.source)} · Re-read: <span class="mono">${esc(q.study)}</span></div></div>`;
+  }
+  const done = R.ids.filter(x => R.picks[x] !== undefined).length;
+  const rightSoFar = R.feedback === "instant" ? R.ids.filter(x => R.done[x] && R.picks[x] === QBY[x].answer).length : null;
+  app.innerHTML = `<div class="card">
+    <div class="row" style="justify-content:space-between"><b>${esc(R.label)}</b>
+      <span class="small muted">${R.i + 1} / ${R.ids.length}${rightSoFar === null ? "" : ` · ${rightSoFar} right`}</span></div>
+    <div class="bar" style="margin:8px 0 14px"><i style="width:${pct(done, R.ids.length)}%;background:var(--dye)"></i></div>
+    <div class="qhead"><span class="pill dye">${esc(c.short)}</span><span class="pill">${esc(q.topic)}</span>
+      <span class="pill">${q.type === "yn" ? "Yes / No" : q.type === "tf" ? "True / False" : "A–" + LET[q.options.length - 1]}</span>${q.origin === "professor" ? `<span class="pill warn">${esc(C.prof)}</span>` : q.twin && QBY[q.twin] ? `<span class="pill">≈ look-alike of ${esc(WHO)} question</span>` : ""}
+      ${r.seen ? `<span class="small muted">before: ${r.right}✓ ${r.wrong}✗</span>` : `<span class="small muted">new</span>`}</div>
+    <div class="qtext">${fmtQ(q.q)}</div>
+    <div class="${BIN(q.type) ? "yn" : ""}">${optHtml}</div>
+    ${fb}
+    <div class="row" style="margin-top:14px;justify-content:space-between">
+      <div class="row">${R.feedback === "end" && R.i > 0 ? `<button class="btn" id="prev">← Back</button>` : ""}
+        <button class="btn" id="quit">Finish now</button></div>
+      <button class="btn pri" id="next" ${(R.feedback === "instant" && !shown) || (R.feedback === "end" && picked === undefined) ? "disabled" : ""}>${R.i === R.ids.length - 1 ? "See results" : "Next →"}</button>
+    </div></div>
+    ${R.feedback === "end" ? `<p class="small muted">Exam mode: no feedback until the end, like the real quiz. You can go back and change answers.</p>` : ""}`;
+  app.querySelectorAll(".opt").forEach(b => b.onclick = () => answer(+b.dataset.k));
+  document.getElementById("next").onclick = next;
+  document.getElementById("quit").onclick = finish;
+  const p = document.getElementById("prev"); if (p) p.onclick = () => { R.i--; render(); };
+}
+
+function viewResult(){
+  if (!R || !R.result) { go("#home"); return; }
+  const s = R.result;
+  const chRows = Object.entries(s.per).map(([cid, v]) => `<tr><td>${esc(CHBY[cid].short)}</td><td>${v.r}/${v.n}</td><td>${pct(v.r, v.n)}%</td></tr>`).join("");
+  const tRows = Object.entries(s.perT).sort((a, b) => a[1].r / a[1].n - b[1].r / b[1].n).map(([k, v]) => { const [cid, t] = k.split("|");
+    const p = pct(v.r, v.n); return `<tr><td>${esc(CHBY[cid].short)}</td><td>${esc(t)}</td><td>${v.r}/${v.n}</td><td><span class="pill ${p >= 80 ? "good" : p >= 60 ? "warn" : "bad"}">${p}%</span></td></tr>`; }).join("");
+  const wrong = s.wrong.map(id => { const q = QBY[id], ord = R.order[id], yours = R.picks[id];
+    const lab = k => BIN(q.type) ? q.options[k] : LET[ord.indexOf(k)] + ") " + q.options[k];
+    return `<div class="card" style="margin-bottom:10px"><div class="qhead"><span class="pill dye">${esc(CHBY[q.chapter].short)}</span><span class="pill">${esc(q.topic)}</span></div>
+      <div style="font-weight:600;white-space:pre-wrap">${fmtQ(q.q)}</div>
+      <div class="small" style="margin-top:6px"><span style="color:var(--bad)">Your answer: ${esc(lab(yours))}</span><br><span style="color:var(--good)">Correct: ${esc(lab(q.answer))}</span></div>
+      <div class="fb no small">${esc(q.why)}<div class="muted" style="margin-top:4px">Source: ${esc(q.source)} · Re-read: <span class="mono">${esc(q.study)}</span></div></div></div>`; }).join("");
+  const p = pct(s.r, s.n);
+  app.innerHTML = `<div class="card"><div class="row" style="justify-content:space-between;align-items:flex-start">
+      <div><h2>${esc(s.label)} — results</h2><div class="muted small">${s.n} answered · ${Math.max(1, Math.round(s.sec / 60))} min</div>
+      <p>${p >= 90 ? "Excellent — this material is ready." : p >= 75 ? "Good. Review the misses below, then retry them." : p >= 50 ? "Partly there. Read the explanations, re-read the pointed sections, then retry." : "This needs study first: re-read the sections below before drilling again."}</p></div>
+      <div style="text-align:right"><div class="big" style="color:${p >= 80 ? "var(--good)" : p >= 60 ? "var(--warn)" : "var(--bad)"}">${s.r}/${s.n}</div><div class="small muted">${p}%</div></div></div>
+    <div class="row" style="margin-top:6px">${s.wrong.length ? `<button class="btn pri" id="retry">Retry the ${s.wrong.length} I missed</button>` : ""}
+      <a class="btn" href="#analysis" style="text-decoration:none">Open my analysis</a><a class="btn" href="#home" style="text-decoration:none">Chapters</a></div></div>
+    <div class="grid"><div class="card" style="margin:0"><h3 style="margin-top:0">By chapter</h3><table><tr><th>Chapter</th><th>Score</th><th></th></tr>${chRows}</table></div>
+    <div class="card tblwrap" style="margin:0"><h3 style="margin-top:0">By topic (weakest first)</h3><table><tr><th>Ch.</th><th>Topic</th><th>Score</th><th></th></tr>${tRows}</table></div></div>
+    ${s.wrong.length ? `<h3 style="margin-top:18px">What you missed</h3>` + wrong : ""}`;
+  const rb = document.getElementById("retry");
+  if (rb) rb.onclick = () => start(shuffle(s.wrong), "Retry · " + s.label);
+}
+
+// Originals vs look-alikes: right on the original but wrong on its look-alikes = memorised, not understood
+function herGap(){
+  if (!PROF.length || !TWINS.length) return null;
+  const gp = groupStats(PROF), gt = groupStats(TWINS);
+  const memo = PROF.filter(id => { const r = st(id), h = r.hist || []; if (!h.length || !h[h.length - 1]) return false;
+    return TWINS.some(t => QBY[t].twin === id && (st(t).hist || []).slice(-1)[0] === 0); });
+  return {gp, gt, memo};
+}
+function herCard(){
+  const x = herGap(); if (!x || (!x.gp.seen && !x.gt.seen)) return "";
+  const a = g => g.acc === null ? "–" : Math.round(g.acc * 100) + "%";
+  const gap = x.gp.acc !== null && x.gt.acc !== null ? Math.round((x.gp.acc - x.gt.acc) * 100) : null;
+  return `<div class="card"><h2>★ ${esc(WHO1)} questions vs look-alikes</h2>
+    <table><tr><th></th><th>Seen</th><th>Right</th></tr><tr><td>Originals</td><td>${x.gp.seen}/${x.gp.n}</td><td>${a(x.gp)}</td></tr>
+    <tr><td>Look-alikes</td><td>${x.gt.seen}/${x.gt.n}</td><td>${a(x.gt)}</td></tr></table>
+    <p class="small">${gap === null ? "Answer some of both to compare." : gap >= 15 ? `You score ${gap} points higher on the originals: some answers are memorised. Re-read the explanations of the look-alikes you missed.` : x.gt.acc < 0.7 ? "Neither set is above 70 % yet, so study the lecture sections first (see What to study next), then drill again." : "Originals and look-alikes are level, so you understand the material rather than remembering answers."}</p>
+    ${x.memo.length ? `<p class="small"><b>Right on the original, wrong on a look-alike:</b></p><ul>${x.memo.slice(0, 6).map(id => `<li class="small">${esc(QBY[id].q.slice(0, 110))} <span class="muted">(${esc(QBY[id].source)})</span></li>`).join("")}</ul>` : ""}</div>`;
+}
+function viewAnalysis(){
+  const v = verdict(), P = plan();
+  const chRows = D.chapters.map(c => { const g = groupStats(chIds(c.id)), [stx, cls] = status(g);
+    return `<tr><td>${esc(c.short)}<div class="small muted">${esc(c.exam)}</div></td><td>${g.seen}/${g.n}</td>
+      <td>${g.acc === null ? "–" : Math.round(g.acc * 100) + "%"}</td><td>${g.recent === null ? "–" : Math.round(g.recent * 100) + "%"}</td>
+      <td style="min-width:90px">${bar(g)}<div class="small muted">${Math.round(g.mastery * 100)}% · ${g.mastered} mastered</div></td><td><span class="pill ${cls}">${stx}</span></td></tr>`; }).join("");
+  const steps = P.list.map((r, i) => {
+    const ptr = studyPointers(r.missed.length ? r.missed : r.ids).slice(0, 2);
+    const why = r.g.seen === 0 ? `not practised yet (${r.g.n} questions)`
+      : `${Math.round((r.acc ?? 0) * 100)}% right on the last attempts, ${r.g.seen}/${r.g.n} seen, ${Math.round(r.g.mastery * 100)}% mastered`;
+    const miss = r.missed.slice(0, 2).map(id => `<li class="small">“${esc(QBY[id].q.slice(0, 110))}${QBY[id].q.length > 110 ? "…" : ""}” → <b>${esc(QBY[id].options[QBY[id].answer])}</b></li>`).join("");
+    return `<li><b>${esc(r.c.short)} — ${esc(r.t)}</b> <span class="small muted">(${why})</span>
+      <div class="small">${r.g.seen === 0 ? "Read" : "Re-read"}: ${ptr.map(p => `<span class="mono">${esc(p)}</span>`).join(" · ")}</div>
+      ${miss ? `<ul style="margin:4px 0">${miss}</ul>` : ""}
+      <button class="btn small" style="margin-top:4px;padding:4px 10px" data-topic="${esc(r.c.id + "|" + r.t)}">Then drill this topic (${r.ids.length} Q)</button></li>`; }).join("");
+  const strong = P.rows.filter(r => r.g.seen >= Math.max(2, r.g.n * 0.6) && (r.acc ?? 0) >= 0.85).map(r => `${esc(r.c.short)} · ${esc(r.t)}`);
+  const sess = S.sessions.slice(-30);
+  const spark = sess.length > 1 ? (() => { const W = 600, H = 120, pts = sess.map((s, i) => [10 + i * (W - 20) / (sess.length - 1), H - 10 - (H - 20) * s.r / s.n]);
+    return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto" role="img" aria-label="accuracy per session">
+      <line x1="10" x2="${W - 10}" y1="${H - 10 - (H - 20) * .9}" y2="${H - 10 - (H - 20) * .9}" stroke="var(--good)" stroke-dasharray="4 4" stroke-width="1"/>
+      <polyline fill="none" stroke="var(--dye)" stroke-width="2" points="${pts.map(p => p.join(",")).join(" ")}"/>
+      ${pts.map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="var(--dye)"/>`).join("")}</svg>
+      <div class="small muted">Accuracy per session (last ${sess.length}); dashed line = 90 % target.</div>`; })() : `<p class="small muted">Do two sessions to see your trend.</p>`;
+  app.innerHTML = `<div class="card"><div class="row" style="justify-content:space-between;align-items:flex-start">
+      <div style="flex:1;min-width:240px"><h2>My status</h2><p>${esc(v.txt)}</p></div>
+      <div style="text-align:right"><div class="big">${v.score === null ? "–" : Math.round(v.score * 100) + "%"}</div><div class="small muted">estimated ${esc(FOCUS.name)} score</div></div></div>${spark}</div>
+    <div class="card tblwrap"><h2>By lecture</h2><table><tr><th>Chapter</th><th>Seen</th><th>Right (all)</th><th>Right (last 3)</th><th>Mastery</th><th>Status</th></tr>${chRows}</table></div>
+    ${herCard()}
+    <div class="card"><h2>What to study next</h2>
+      ${steps ? `<p class="small muted">Ordered by how weak each topic is, how many questions you are missing in it, and how soon its exam is. Do them top to bottom: read the pointed section in the study notes, then drill.</p><ol class="plan">${steps}</ol>`
+        : `<p>Nothing urgent — every topic you have practised is above target. Run a ${esc(FOCUS.name)} simulation to confirm.</p>`}
+      ${strong.length ? `<p class="small"><b>Solid already:</b> ${strong.join(" · ")}</p>` : ""}</div>
+    <div class="card"><h2>Ask Claude for a deeper analysis</h2>
+      <p class="small">This page analyses your answers by itself. For a personal explanation of <em>why</em> you miss what you miss, copy this report and paste it to Claude in your study session — it reads the same study files and can quiz you on the weak spots.</p>
+      <textarea id="rep" readonly>${esc(report())}</textarea>
+      <div class="row" style="margin-top:8px"><button class="btn pri" id="copy">Copy report</button><span id="cmsg" class="small muted"></span></div></div>`;
+  app.querySelectorAll("[data-topic]").forEach(b => b.onclick = () => { const [cid, t] = b.dataset.topic.split("|"); start(pick(topicIds(cid, t), "all"), `${CHBY[cid].short} · ${t}`); });
+  document.getElementById("copy").onclick = async () => { const ta = document.getElementById("rep");
+    try { await navigator.clipboard.writeText(ta.value); } catch(e) { ta.select(); document.execCommand("copy"); }
+    document.getElementById("cmsg").textContent = "Copied — paste it into Claude."; };
+}
+
+function viewHistory(){
+  const rows = S.sessions.slice().reverse().map(s => `<tr><td class="small">${new Date(s.t).toLocaleString()}</td><td>${esc(s.label)}</td><td>${s.r}/${s.n}</td>
+    <td><span class="pill ${pct(s.r, s.n) >= 80 ? "good" : pct(s.r, s.n) >= 60 ? "warn" : "bad"}">${pct(s.r, s.n)}%</span></td><td class="small muted">${Math.max(1, Math.round(s.sec / 60))} min</td></tr>`).join("");
+  app.innerHTML = `<div class="card tblwrap"><h2>History</h2>${rows ? `<table><tr><th>When</th><th>Session</th><th>Score</th><th></th><th>Time</th></tr>${rows}</table>` : `<p class="muted">No sessions yet.</p>`}</div>`;
+}
+
+function viewSettings(){
+  app.innerHTML = `<div class="card"><h2>Settings</h2>
+    <h3>Feedback in practice sessions</h3>
+    <label class="chk"><input type="radio" name="fb" value="instant" ${S.settings.feedback === "instant" ? "checked" : ""}> Show the answer after each question</label>
+    <label class="chk"><input type="radio" name="fb" value="end" ${S.settings.feedback === "end" ? "checked" : ""}> Exam style — only at the end</label>
+    <p class="small muted">Quiz simulations are always exam style.</p>
+    <h3>Questions per practice session</h3>
+    <div class="row">${[10, 15, 20, 30].map(n => `<label class="chk"><input type="radio" name="sz" value="${n}" ${S.settings.size === n ? "checked" : ""}> ${n}</label>`).join("")}</div>
+    <h3>Theme</h3><div class="row">${["auto", "light", "dark"].map(t => `<label class="chk"><input type="radio" name="th" value="${t}" ${(localStorage.getItem(KEY + ".theme") || "auto") === t ? "checked" : ""}> ${t}</label>`).join("")}</div>
+    <h3>Your data</h3>
+    <p class="small muted">Progress is stored only in this browser. Export it to move it to another device or back it up.</p>
+    <div class="row"><button class="btn" id="exp">Export progress</button><label class="btn">Import progress<input type="file" id="imp" accept=".json" hidden></label>
+      <button class="btn" id="rst" style="color:var(--bad)">Reset all progress</button></div><p id="smsg" class="small"></p></div>`;
+  app.querySelectorAll("[name=fb]").forEach(i => i.onchange = () => { S.settings.feedback = i.value; save(); });
+  app.querySelectorAll("[name=sz]").forEach(i => i.onchange = () => { S.settings.size = +i.value; save(); });
+  app.querySelectorAll("[name=th]").forEach(i => i.onchange = () => { try { localStorage.setItem(KEY + ".theme", i.value); } catch(e) {} theme(); });
+  document.getElementById("exp").onclick = () => { const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(S)], {type: "application/json"})); a.download = C.code.toLowerCase() + "-quiz-progress.json"; a.click(); };
+  document.getElementById("imp").onchange = e => { const f = e.target.files[0]; if (!f) return; f.text().then(t => {
+    try { const o = JSON.parse(t); if (!o.q) throw 0; S = Object.assign(blank(), o); save(); document.getElementById("smsg").textContent = "Imported."; }
+    catch(_) { document.getElementById("smsg").textContent = "That file is not a progress export."; } }); };
+  let armed = false;
+  document.getElementById("rst").onclick = e => { if (!armed) { armed = true; e.target.textContent = "Click again to erase everything"; return; }
+    S = blank(); save(); R = null; document.getElementById("smsg").textContent = "Progress reset."; armed = false; e.target.textContent = "Reset all progress"; };
+}
+
+function theme(){ let t = "auto"; try { t = localStorage.getItem(KEY + ".theme") || "auto"; } catch(e) {}
+  if (t === "auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", t); }
+
+function render(){
+  nav();
+  const h = (location.hash || "#home").split("?")[0];
+  if (!D.questions.length) { app.innerHTML = `<div class="card">No questions found — run <span class="mono">python3 website/build_quiz.py</span>.</div>`; return; }
+  ({"#run": viewRun, "#result": viewResult, "#analysis": viewAnalysis, "#history": viewHistory, "#settings": viewSettings}[h] || viewHome)();
+}
+document.addEventListener("keydown", e => {
+  if (location.hash !== "#run" || !R || R.finished || e.metaKey || e.ctrlKey || e.altKey) return;
+  const id = R.ids[R.i], q = QBY[id], k = e.key.toLowerCase();
+  const order = R.order[id];
+  let pos = -1;
+  if (BIN(q.type)) { if (k === "1" || k === (q.type === "yn" ? "y" : "t")) pos = 0; if (k === "2" || k === (q.type === "yn" ? "n" : "f")) pos = 1; }
+  else { pos = "12345".indexOf(k); if (pos < 0) pos = "abcde".indexOf(k); }
+  const locked = R.feedback === "instant" && R.done[id];
+  if (pos >= 0 && pos < order.length && !locked) { e.preventDefault(); answer(order[pos]); return; }
+  if ((k === "enter" || k === "arrowright") && !document.getElementById("next").disabled) { e.preventDefault(); next(); }
+});
+theme(); render();
+</script>
+</body>
+</html>

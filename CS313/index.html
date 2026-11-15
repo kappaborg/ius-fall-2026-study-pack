@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex, nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CS313 Study Site</title>
+<style>
+/* ============ tokens ============ */
+:root{
+  --surface:#F5F7F9; --card:#FFFFFF; --ink:#1D242E; --muted:#5B6675;
+  --line:#D6DCE3; --line-strong:#AEB8C4;
+  --dye:#24549C; --dye-ink:#FFFFFF; --dye-soft:#E3EBF7;
+  --brass:#B08D2F; --good:#2F7D48; --good-soft:#E5F1E9; --warn:#C77E1D; --warn-soft:#F7EEDD;
+  --shadow:0 1px 3px rgba(29,36,46,.08),0 4px 14px rgba(29,36,46,.06);
+}
+html[data-theme="dark"]{
+  --surface:#14181E; --card:#1B222B; --ink:#E5EAF1; --muted:#93A0B0;
+  --line:#2B3441; --line-strong:#3D4956;
+  --dye:#4E86DE; --dye-ink:#0E1524; --dye-soft:#1E2C42;
+  --brass:#C09A35; --good:#5CA877; --good-soft:#1D2E24; --warn:#D89A45; --warn-soft:#33291A;
+  --shadow:0 1px 3px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto} *{transition:none!important;animation:none!important}}
+body{
+  font:15px/1.6 "Avenir Next","Segoe UI",-apple-system,BlinkMacSystemFont,sans-serif;
+  background:var(--surface);color:var(--ink);
+}
+.disp{font-family:"Avenir Next Condensed","Arial Narrow","Avenir Next",sans-serif;
+  font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+button{font:inherit;cursor:pointer;color:inherit;background:none;border:none}
+:focus-visible{outline:2px solid var(--dye);outline-offset:2px;border-radius:2px}
+a{color:var(--dye)}
+
+/* ============ shell ============ */
+#app{display:grid;grid-template-columns:264px 1fr;min-height:100vh}
+aside{
+  border-right:1px solid var(--line);background:var(--card);
+  padding:18px 0 30px;position:sticky;top:0;height:100vh;overflow-y:auto
+}
+.brand{padding:0 18px 14px;border-bottom:2px solid var(--ink)}
+.brand .disp{font-size:19px;line-height:1.2}
+.brand small{color:var(--muted);font-size:11.5px;display:block;margin-top:3px}
+.navsec{padding:14px 18px 4px;font-size:10.5px;color:var(--muted)}
+.nav a{
+  display:flex;gap:9px;align-items:baseline;padding:5px 18px;color:inherit;
+  text-decoration:none;font-size:13.5px;border-left:3px solid transparent
+}
+.nav a:hover{background:var(--dye-soft)}
+.nav a.on{border-left-color:var(--dye);background:var(--dye-soft);font-weight:600}
+.nav .op{font-size:10.5px;color:var(--muted);min-width:24px}
+.nav .dot{margin-left:auto;font-size:10px}
+.dot.pass{color:var(--good)} .dot.work{color:var(--warn)}
+main{padding:34px clamp(20px,4vw,56px) 80px;max-width:1060px;width:100%}
+
+/* ============ title block (signature) ============ */
+.tblock{
+  border:2px solid var(--ink);display:grid;background:var(--card);
+  grid-template-columns:repeat(auto-fit,minmax(120px,1fr));margin-top:34px
+}
+.tblock>div{border-right:1px solid var(--line-strong);border-top:1px solid var(--line-strong);padding:7px 12px 8px}
+.tblock>div:last-child{border-right:none}
+.tblock label{display:block;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.tblock b{font-size:14px;font-weight:600}
+.stamp{
+  display:inline-block;border:2px solid var(--good);color:var(--good);border-radius:4px;
+  padding:1px 10px;font-size:11px;transform:rotate(-3deg);letter-spacing:.14em
+}
+.stamp.work{border-color:var(--warn);color:var(--warn)}
+.stamp.open{border-color:var(--muted);color:var(--muted)}
+
+/* ============ dashboard ============ */
+.eyebrow{font-size:11px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase}
+h1.disp{font-size:clamp(26px,3.4vw,36px);line-height:1.1;margin:4px 0 6px;border-bottom:3px solid var(--dye);display:inline-block;padding-bottom:6px}
+.sub{color:var(--muted);margin-bottom:26px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:22px 0 30px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px 16px;box-shadow:var(--shadow)}
+.tile b{font-size:26px;font-weight:600;display:block;line-height:1.15}
+.tile span{font-size:12px;color:var(--muted)}
+.tile em{font-style:normal;font-size:12px;color:var(--brass);font-weight:600}
+h2.disp{font-size:15px;margin:30px 0 10px;color:var(--muted)}
+table.traveler{width:100%;border-collapse:collapse;background:var(--card);border:2px solid var(--ink);box-shadow:var(--shadow)}
+.traveler th{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 12px;border-bottom:2px solid var(--ink)}
+.traveler td{padding:7px 12px;border-bottom:1px solid var(--line);font-size:13.5px;vertical-align:middle}
+.traveler tr:hover td{background:var(--dye-soft)}
+.traveler tr{cursor:pointer}
+.opno{font-size:11px;color:var(--muted)}
+.bar{height:8px;background:var(--line);border-radius:4px;min-width:110px;position:relative;overflow:hidden}
+.bar i{position:absolute;inset:0 auto 0 0;background:var(--dye);border-radius:4px}
+.barlbl{font-size:11.5px;color:var(--muted);margin-left:8px}
+.dl{display:flex;gap:12px;align-items:baseline;padding:8px 2px;border-bottom:1px dashed var(--line);font-size:14px}
+.dl .mono{color:var(--muted);font-size:12px;min-width:86px}
+.dl .days{margin-left:auto;font-size:12px;color:var(--muted);white-space:nowrap}
+.dl .days.soon{color:var(--warn);font-weight:600}
+.pts{font-size:10.5px;border:1px solid var(--brass);color:var(--brass);border-radius:3px;padding:0 6px;letter-spacing:.06em}
+
+/* ============ reader ============ */
+.crumbs{font-size:12px;color:var(--muted);margin-bottom:10px}
+.tabs{display:flex;gap:2px;margin:16px 0 0;border-bottom:2px solid var(--ink)}
+.tabs button{padding:7px 18px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border:1px solid transparent;border-bottom:none}
+.tabs button.on{background:var(--card);border-color:var(--ink);border-bottom:2px solid var(--card);margin-bottom:-2px;color:var(--ink);font-weight:600}
+.paper{background:var(--card);border:1px solid var(--line);border-top:none;padding:30px clamp(18px,3vw,44px);box-shadow:var(--shadow)}
+.paper h1{font-size:24px;margin:0 0 14px;line-height:1.25}
+.paper h2{font-size:18px;margin:26px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--line)}
+.paper h3{font-size:15.5px;margin:20px 0 6px}
+.paper p{margin:8px 0}
+.paper ul,.paper ol{margin:8px 0 8px 24px}
+.paper li{margin:3px 0}
+.paper code{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:.9em;background:var(--dye-soft);padding:1px 5px;border-radius:3px}
+.paper pre{background:var(--dye-soft);padding:12px 14px;border-radius:6px;overflow-x:auto;margin:10px 0}
+.paper pre code{background:none;padding:0}
+.paper blockquote{border-left:3px solid var(--brass);padding:2px 14px;color:var(--muted);margin:10px 0}
+.paper hr{border:none;border-top:1px dashed var(--line-strong);margin:18px 0}
+.twrap{overflow-x:auto;margin:12px 0}
+.paper table{border-collapse:collapse;font-size:13.5px;min-width:50%}
+.paper th{background:var(--dye-soft);text-align:left;font-weight:600}
+.paper th,.paper td{border:1px solid var(--line-strong);padding:6px 10px}
+.actions{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.btn{border:1px solid var(--line-strong);border-radius:6px;padding:8px 16px;font-size:13px;background:var(--card);box-shadow:var(--shadow)}
+.btn:hover{border-color:var(--dye);color:var(--dye)}
+.btn.primary{background:var(--dye);color:var(--dye-ink);border-color:var(--dye);font-weight:600}
+.btn.primary:hover{filter:brightness(1.08);color:var(--dye-ink)}
+
+/* ============ quiz / test ============ */
+.qwrap{max-width:720px;margin:0 auto}
+.qmeta{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:8px}
+.qbar{height:5px;background:var(--line);border-radius:3px;margin-bottom:24px;overflow:hidden}
+.qbar i{display:block;height:100%;background:var(--dye);border-radius:3px}
+.qcard{
+  background:var(--card);border:2px solid var(--ink);border-radius:10px;box-shadow:var(--shadow);
+  padding:34px 34px 28px;min-height:230px;display:flex;flex-direction:column;gap:14px
+}
+.qcard .qlbl{font-size:10px;letter-spacing:.16em;color:var(--brass);text-transform:uppercase;font-weight:600}
+.qcard .qq{font-size:19px;font-weight:600;line-height:1.45}
+.qcard .qa{font-size:15.5px;border-top:1px dashed var(--line-strong);padding-top:14px;color:var(--ink)}
+.qbtns{display:flex;gap:10px;margin-top:18px;justify-content:center;flex-wrap:wrap}
+.qbtns .btn{min-width:150px;text-align:center}
+.btn.good{border-color:var(--good);color:var(--good)} .btn.good:hover{background:var(--good-soft)}
+.btn.bad{border-color:var(--warn);color:var(--warn)} .btn.bad:hover{background:var(--warn-soft)}
+.kbd{font-size:11px;color:var(--muted);text-align:center;margin-top:10px}
+.kbd kbd{border:1px solid var(--line-strong);border-radius:3px;padding:0 5px;font-family:ui-monospace,monospace;font-size:10.5px}
+.score-hero{font-size:56px;font-weight:600;line-height:1}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 18px}
+.chip{border:1px solid var(--line-strong);border-radius:16px;padding:4px 14px;font-size:12.5px}
+.chip.on{background:var(--dye);color:var(--dye-ink);border-color:var(--dye);font-weight:600}
+select{font:inherit;background:var(--card);color:inherit;border:1px solid var(--line-strong);border-radius:6px;padding:6px 10px}
+.hist td,.hist th{font-size:12.5px}
+.missed{background:var(--warn-soft);border:1px solid var(--warn);border-radius:8px;padding:12px 16px;margin-top:16px;font-size:13.5px}
+.topbar{display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px}
+
+/* ============ figure gallery ============ */
+.figs{display:grid;gap:22px}
+.figs figure{margin:0;background:var(--card);border:1px solid var(--line-strong);border-radius:6px;overflow:hidden;box-shadow:var(--shadow)}
+.figs img{display:block;width:100%;height:auto;background:#fff}
+.figs figcaption{padding:6px 12px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-top:1px solid var(--line)}
+
+/* ============ notes pad ============ */
+.pad{margin-top:26px;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--brass);border-radius:6px;box-shadow:var(--shadow)}
+.pad .padhead{display:flex;align-items:baseline;gap:10px;padding:10px 16px 0}
+.pad .padhead .disp{font-size:12px;color:var(--muted)}
+.pad .saved{margin-left:auto;font-size:11px;color:var(--good);opacity:0;transition:opacity .3s}
+.pad .saved.show{opacity:1}
+.pad textarea{
+  display:block;width:100%;min-height:130px;border:none;background:transparent;color:inherit;
+  font:14px/1.7 "Avenir Next","Segoe UI",sans-serif;padding:10px 16px 14px;resize:vertical;outline:none
+}
+.pad textarea::placeholder{color:var(--muted);opacity:.7}
+.iconbtn{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:6px;padding:4px 10px}
+.iconbtn:hover{color:var(--dye);border-color:var(--dye)}
+
+/* ============ exercises ============ */
+.exlist{display:grid;gap:10px;margin-top:14px}
+.exrow{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--line-strong);border-radius:8px;padding:12px 14px;cursor:pointer;box-shadow:var(--shadow)}
+.exrow:hover{border-color:var(--dye)}
+.exrow.done{border-left-color:var(--good)}
+.exrow.tried{border-left-color:var(--warn)}
+.exrow b{display:block;font-size:14.5px}
+.exrow small{color:var(--muted);font-size:12px}
+.extag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--line-strong);border-radius:3px;padding:0 6px;color:var(--muted);margin-left:6px}
+.extag.warm{border-color:var(--good);color:var(--good)}
+.extag.core{border-color:var(--dye);color:var(--dye)}
+.extag.hard{border-color:var(--warn);color:var(--warn)}
+.expane{background:var(--card);border:1px solid var(--line);border-radius:8px;box-shadow:var(--shadow);padding:16px 18px;margin-top:12px}
+.expane h3{margin:0 0 6px;font-size:17px}
+.exprompt{font-size:14px}
+.exprompt code{font-family:ui-monospace,Menlo,monospace;background:var(--dye-soft);padding:1px 5px;border-radius:3px}
+.exed{width:100%;min-height:220px;font:13px/1.55 ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  background:var(--surface);color:var(--ink);border:1px solid var(--line-strong);border-radius:6px;padding:10px 12px;resize:vertical;white-space:pre;tab-size:4}
+.exout{font:12.5px/1.5 ui-monospace,Menlo,monospace;white-space:pre-wrap;background:var(--surface);border:1px solid var(--line);
+  border-radius:6px;padding:10px 12px;margin-top:10px;max-height:300px;overflow:auto}
+.exout.pass{border-color:var(--good);background:var(--good-soft)}
+.exout.fail{border-color:var(--warn);background:var(--warn-soft)}
+.exbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.exnote{font-size:12px;color:var(--muted);margin-top:8px}
+.exstat{font-size:12px;color:var(--muted);margin-left:auto}
+/* ============ tracks & compare ============ */
+.trk{display:inline-block;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;border-radius:3px;padding:0 6px;margin-left:6px;vertical-align:middle;border:1px solid var(--line-strong);color:var(--muted)}
+.trk.cur{border-color:var(--good);color:var(--good)}
+.trk.arc{border-color:var(--brass);color:var(--brass)}
+.nav a.arc{opacity:.85}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
+.cmp>div{background:var(--card);border:1px solid var(--line);border-radius:6px;box-shadow:var(--shadow);min-width:0}
+.cmp h3{font-size:12px;letter-spacing:.12em;text-transform:uppercase;padding:10px 14px;border-bottom:2px solid var(--ink);margin:0;display:flex;justify-content:space-between;align-items:baseline}
+.cmp h3 small{font-weight:400;letter-spacing:0;text-transform:none;color:var(--muted);font-size:11.5px}
+.cmp .sl{padding:8px 14px;border-bottom:1px dashed var(--line)}
+.cmp .sl .n{font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+.cmp .ln{font-size:13px;line-height:1.45;padding:1px 6px;border-radius:3px;margin:1px 0;color:var(--muted)}
+.cmp .ln.add{background:var(--good-soft);color:var(--ink);border-left:3px solid var(--good)}
+.cmp .ln.del{background:var(--warn-soft);color:var(--ink);border-left:3px solid var(--warn)}
+.cmp .sl.changed{background:color-mix(in srgb,var(--card),var(--dye-soft) 35%)}
+.cmpsum{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;margin:12px 0 0;color:var(--muted)}
+.cmpsum b{color:var(--ink)}
+.legend{display:flex;gap:14px;font-size:11.5px;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:2px;vertical-align:middle;margin-right:4px}
+@media(max-width:840px){
+  .cmp{grid-template-columns:1fr}
+  #app{grid-template-columns:1fr}
+  aside{position:static;height:auto;border-right:none;border-bottom:1px solid var(--line)}
+  .nav{display:grid;grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <aside>
+    <div class="brand">
+      <div class="disp" id="brandName"></div>
+      <small id="brandSub"></small>
+    </div>
+    <div class="navsec disp">Control</div>
+    <nav class="nav" id="navTop"></nav>
+    <div class="navsec disp">Operations — chapters</div>
+    <nav class="nav" id="navCh"></nav>
+    <div class="navsec disp">Deliverables</div>
+    <nav class="nav" id="navDeliv"></nav>
+  </aside>
+  <main id="main" tabindex="-1"></main>
+</div>
+
+<a href="quiz.html" style="position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:50;background:#24549C;color:#fff;padding:9px 14px;border-radius:999px;font:600 13px system-ui,sans-serif;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.25)">Quiz Trainer →</a>
+<script src="data.js"></script>
+<script>
+"use strict";
+/* ================= state ================= */
+const C=window.COURSE, CH=C.chapters;
+const B=Object.assign({key:"course.v1",brand:"Study Site",code:"COURSE",sub:"",eyebrow:"",hero:"Study Traveler",
+  tagline:"Every chapter is an operation. Read it, quiz it, earn the stamp.",testHint:""},C.brandcfg||{});
+const LS=B.key;
+document.title=B.code+" · "+B.brand+" — Study Traveler";
+document.getElementById("brandName").textContent=B.brand;
+document.getElementById("brandSub").innerHTML=B.sub;
+const S=Object.assign({read:{},cards:{},best:{},tests:[],notes:{},ex:{},theme:null},JSON.parse(localStorage.getItem(LS)||"{}"));
+if(!S.notes)S.notes={};if(!S.ex)S.ex={};
+const save=()=>localStorage.setItem(LS,JSON.stringify(S));
+const byId=id=>CH.find(c=>c.id===id);
+const CUR=C.currentTrack||"";
+const TRACKS=[...new Set(CH.map(c=>c.track||CUR))];
+const trackName=t=>(C.trackNames||{})[t]||(t?t:"Chapters");
+const opLabel=c=>c.tag||(c.id==="calc"?"WB":c.id==="appx"?"AX":"OP "+c.id);
+const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+/* theme */
+function applyTheme(){
+  const pref=S.theme||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");
+  document.documentElement.dataset.theme=pref;
+}
+applyTheme();
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change",applyTheme);
+
+/* ================= card stats ================= */
+const ck=(cid,i)=>cid+":"+i;
+const stat=k=>S.cards[k]||{r:0,w:0,streak:0};
+function mark(k,ok){const s=stat(k);ok?(s.r++,s.streak++):(s.w++,s.streak=0);S.cards[k]=s;save();}
+const known=k=>stat(k).streak>=2;
+const weakKeys=()=>CH.flatMap(c=>c.cards.map((_,i)=>ck(c.id,i))).filter(k=>{const s=stat(k);return s.w>0&&s.streak<2;});
+function mastery(c){
+  if(!c.cards.length) return S.read[c.id]?1:0;
+  return c.cards.filter((_,i)=>known(ck(c.id,i))).length/c.cards.length;
+}
+function chStatus(c){
+  const best=S.best[c.id];
+  if(best!=null&&best>=80) return "pass";
+  const touched=S.read[c.id]||c.cards.some((_,i)=>{const s=stat(ck(c.id,i));return s.r+s.w>0;});
+  return touched?"work":"open";
+}
+const stampHTML={pass:'<span class="stamp disp">✓ Passed</span>',work:'<span class="stamp work disp">⟳ In work</span>',open:'<span class="stamp open disp">— Open</span>'};
+
+/* ================= markdown ================= */
+function inline(t){
+  return t
+    .replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>")
+    .replace(/(^|[^*])\*([^*\n]+)\*/g,"$1<em>$2</em>")
+    .replace(/`([^`]+)`/g,"<code>$1</code>")
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
+}
+function renderMD(md){
+  const lines=md.split("\n"); let html="",i=0,inUL=false,inOL=false,inBQ=false;
+  const closeLists=()=>{if(inUL){html+="</ul>";inUL=false}if(inOL){html+="</ol>";inOL=false}if(inBQ){html+="</blockquote>";inBQ=false}};
+  while(i<lines.length){
+    let raw=lines[i], l=esc(raw);
+    if(/^```/.test(raw)){closeLists();let code="";i++;
+      while(i<lines.length&&!/^```/.test(lines[i])){code+=esc(lines[i])+"\n";i++;}
+      html+="<pre><code>"+code+"</code></pre>";i++;continue;}
+    if(/^\s*\|/.test(raw)){closeLists();let rows=[];
+      while(i<lines.length&&/^\s*\|/.test(lines[i])){rows.push(lines[i]);i++;}
+      const cells=r=>r.trim().replace(/^\||\|$/g,"").split("|").map(x=>inline(esc(x.trim())));
+      let t="<div class='twrap'><table>";
+      rows.forEach((r,ri)=>{ if(/^\s*\|[\s:|-]+\|?\s*$/.test(r)) return;
+        const tag=ri===0?"th":"td";
+        t+="<tr>"+cells(r).map(c=>`<${tag}>${c}</${tag}>`).join("")+"</tr>";});
+      html+=t+"</table></div>";continue;}
+    const h=l.match(/^(#{1,4})\s+(.*)/);
+    if(h){closeLists();const n=h[1].length;html+=`<h${n}>${inline(h[2])}</h${n}>`;i++;continue;}
+    if(/^\s*(---+|___+)\s*$/.test(l)){closeLists();html+="<hr>";i++;continue;}
+    const bq=l.match(/^>\s?(.*)/);
+    if(bq){if(!inBQ){closeLists();html+="<blockquote>";inBQ=true}html+="<p>"+inline(bq[1])+"</p>";i++;continue;}
+    else if(inBQ){html+="</blockquote>";inBQ=false;}
+    const ul=l.match(/^\s*[-*]\s+(.*)/), ol=l.match(/^\s*\d+\.\s+(.*)/);
+    if(ul){if(inOL){html+="</ol>";inOL=false}if(!inUL){html+="<ul>";inUL=true}
+      html+="<li>"+inline(ul[1].replace(/^\[ \]/,"☐").replace(/^\[x\]/i,"☑"))+"</li>";i++;continue;}
+    if(ol){if(inUL){html+="</ul>";inUL=false}if(!inOL){html+="<ol>";inOL=true}
+      html+="<li>"+inline(ol[1])+"</li>";i++;continue;}
+    if(!l.trim()){closeLists();i++;continue;}
+    closeLists();
+    const emP=l.trim().match(/^_(.+)_$/);
+    html+="<p>"+(emP?"<em>"+inline(emP[1])+"</em>":inline(l))+"</p>";i++;
+  }
+  closeLists();return html;
+}
+
+/* ================= nav ================= */
+function navHTML(){
+  const here=location.hash||"#/dash";
+  document.getElementById("navTop").innerHTML=[
+    ["#/dash","⌂","Dashboard"],["#/test","▤","Test bench"],["#/weak","⚑","Weak cards ("+weakKeys().length+")"],["#/play","⌨","Code playground"]
+  ].map(([h,ic,t])=>`<a href="${h}" class="${here===h?'on':''}"><span class="op">${ic}</span>${t}</a>`).join("");
+  const link=c=>{const st=chStatus(c);
+    return `<a href="#/ch/${c.id}" class="${here.startsWith('#/ch/'+c.id)?'on':''} ${c.track&&c.track!==CUR?'arc':''}">
+      <span class="op mono">${opLabel(c)}</span>${c.title}
+      <span class="dot ${st==='pass'?'pass':st==='work'?'work':''}">${st==="pass"?"●":st==="work"?"◐":"○"}</span></a>`;};
+  document.getElementById("navCh").innerHTML=TRACKS.length>1
+    ?TRACKS.map(t=>`<div class="navsec disp" style="padding-top:8px">${esc(trackName(t))}</div>`+CH.filter(c=>(c.track||CUR)===t).map(link).join("")).join("")
+    :CH.map(link).join("");
+  document.getElementById("navDeliv").innerHTML=C.deliverables.map((d,i)=>
+    `<a href="#/deliv/${i}" class="${here==='#/deliv/'+i?'on':''}"><span class="op">✎</span>${esc(d.short||d.title)}</a>`).join("");
+  document.querySelector('.navsec:nth-of-type(3)').style.display=C.deliverables.length?"":"none";
+}
+
+/* ================= views ================= */
+const M=document.getElementById("main");
+const topbar=`<div class="topbar">
+  <button class="iconbtn" onclick="toggleTheme()">◐ theme</button>
+  <button class="iconbtn" onclick="exportProgress()">⇩ export progress</button>
+  <button class="iconbtn" onclick="importProgress()">⇧ import</button></div>`;
+function toggleTheme(){S.theme=(document.documentElement.dataset.theme==="dark")?"light":"dark";save();applyTheme();}
+function exportProgress(){
+  const a=document.createElement("a");
+  a.href="data:application/json,"+encodeURIComponent(JSON.stringify(S));
+  a.download=B.code.toLowerCase()+"-progress.json";a.click();
+}
+function importProgress(){
+  const inp=document.createElement("input");inp.type="file";inp.accept=".json";
+  inp.onchange=()=>{const r=new FileReader();r.onload=()=>{try{Object.assign(S,JSON.parse(r.result));save();route();}catch(e){alert("Not a valid progress file.")}};r.readAsText(inp.files[0]);};
+  inp.click();
+}
+
+function daysTo(d){return Math.ceil((new Date(d+"T09:00")-new Date())/864e5);}
+
+function dashView(){
+  const totalCards=CH.reduce((n,c)=>n+c.cards.length,0);
+  const knownN=CH.reduce((n,c)=>n+c.cards.filter((_,i)=>known(ck(c.id,i))).length,0);
+  const overall=Math.round(CH.reduce((s,c)=>s+mastery(c),0)/CH.length*100);
+  const next=C.deadlines.map(d=>({...d,days:daysTo(d.date)})).filter(d=>d.days>=0)[0];
+  M.innerHTML=topbar+`
+    <div class="eyebrow">${B.eyebrow}</div>
+    <h1 class="disp">${B.hero}</h1>
+    <p class="sub">${B.tagline} 80 % on a full-chapter quiz = PASSED.</p>
+    <div class="tiles">
+      <div class="tile"><b>${overall}%</b><span>overall mastery</span></div>
+      <div class="tile"><b>${knownN}<em> / ${totalCards}</em></b><span>cards known (streak ≥ 2)</span></div>
+      <div class="tile"><b>${weakKeys().length}</b><span>weak cards to fix</span></div>
+      <div class="tile"><b>${next?next.days+"d":"—"}</b><span>${next?esc(next.label).slice(0,46):"no deadlines left"}</span></div>
+    </div>
+    ${TRACKS.map(t=>`<h2 class="disp">${esc(trackName(t))}${TRACKS.length>1?` <span class="trk ${t===CUR?'cur':'arc'}">${t===CUR?'this semester':'archive'}</span>`:''}</h2>
+    <table class="traveler"><tr><th>Op</th><th>Operation</th><th>Coverage</th><th>Mastery</th><th>Best quiz</th><th>Status</th></tr>
+    ${CH.filter(c=>(c.track||CUR)===t).map(c=>{const m=Math.round(mastery(c)*100),st=chStatus(c);
+      return `<tr onclick="location.hash='#/ch/${c.id}'">
+        <td class="opno mono">${opLabel(c)}</td>
+        <td><strong>${c.title}</strong>${c.compare&&byId(c.compare)?` <span class="trk">⇄ ${esc(opLabel(byId(c.compare)))}</span>`:""}</td>
+        <td class="opno">${c.slides}</td>
+        <td><span style="display:inline-flex;align-items:center"><span class="bar"><i style="width:${m}%"></i></span><span class="barlbl mono">${m}%</span></span></td>
+        <td class="mono" style="font-size:12px">${S.best[c.id]!=null?S.best[c.id]+"%":"—"}</td>
+        <td>${stampHTML[st]}</td></tr>`;}).join("")}
+    </table>`).join("")}
+    <h2 class="disp">Deadline ladder</h2>
+    ${C.deadlines.map(d=>{const n=daysTo(d.date);
+      return `<div class="dl"><span class="mono">${d.date}</span><span>${esc(d.label)}</span>
+        ${d.pts?`<span class="pts">${d.pts} pts</span>`:""}
+        <span class="days ${n<=14&&n>=0?"soon":""}">${n<0?"done/past":n===0?"TODAY":"in "+n+" days"}</span></div>`;}).join("")}
+    ${titleBlock({SECTION:"—",SHEET:"Dashboard",REV:S.tests.length+" tests run",CHECKED:overall+"%"})}
+  `;
+}
+
+function titleBlock(cells){
+  return `<div class="tblock">${Object.entries(cells).map(([k,v])=>
+    `<div><label>${k}</label><b>${v}</b></div>`).join("")}
+    <div><label>Drawn by</label><b>Claude + Ismet</b></div>
+    <div><label>Course</label><b class="mono" style="font-size:12px">${B.code}</b></div></div>`;
+}
+
+let readerTab="auto";
+let padTimer=null;
+function padHTML(key,hint){
+  return `<div class="pad"><div class="padhead">
+      <span class="disp">✎ My notes</span><span style="font-size:11px;color:var(--muted)">${hint}</span>
+      <span class="saved" id="padSaved">saved ✓</span></div>
+    <textarea id="pad" placeholder="Type anything — questions for the professor, mnemonics, things that confused you. Autosaves as you type; survives reloads and closing the browser."
+      oninput="padSave('${key}')">${esc(S.notes[key]||"")}</textarea></div>`;
+}
+function padSave(key){
+  S.notes[key]=document.getElementById("pad").value;save();
+  clearTimeout(padTimer);
+  padTimer=setTimeout(()=>{
+    const el=document.getElementById("padSaved");
+    if(el){el.classList.add("show");setTimeout(()=>el.classList.remove("show"),1200);}
+  },350);
+}
+function figGallery(c){
+  return `<div class="figs" style="margin-top:14px">${c.figs.map(f=>
+    `<figure><img src="${f.src}" loading="lazy" alt="Slide ${f.n}">
+     <figcaption>${typeof f.n==="string"?esc(f.n):c.id==="appx"?"Appendix page "+f.n:"Slide "+f.n} · ${esc(c.title)}</figcaption></figure>`).join("")}</div>`;
+}
+function chView(id){
+  const c=byId(id); if(!c){location.hash="#/dash";return;}
+  const hasLesson=!!c.lesson, hasFigs=!!(c.figs&&c.figs.length), other=c.compare?byId(c.compare):null, hasCmp=!!(other&&c.slideText&&other.slideText), hasEx=!!(c.exercises&&c.exercises.length);
+  let tab=readerTab==="auto"?(hasLesson?"lesson":"notes"):readerTab;
+  if(tab==="lesson"&&!hasLesson)tab="notes";
+  if(tab==="figs"&&!hasFigs)tab="notes";
+  if(tab==="compare"&&!hasCmp)tab="notes";
+  if(tab==="exercises"&&!hasEx)tab="notes";
+  if(tab!=="exercises")openEx=null;
+  const trk=(c.track||CUR);
+  const st=chStatus(c);
+  M.innerHTML=topbar+`
+    <div class="crumbs mono">${opLabel(c)} · ${c.slides} · ${c.cards.length} cards${hasFigs?" · "+c.figs.length+" figures":""}${hasEx?" · "+c.exercises.length+" exercises":""}${TRACKS.length>1?` <span class="trk ${trk===CUR?'cur':'arc'}">${esc(trackName(trk))}${trk===CUR?'':' · archive'}</span>`:""}</div>
+    <h1 class="disp">${c.title}</h1>
+    ${trk!==CUR&&TRACKS.length>1?`<p class="sub" style="margin:6px 0 0;font-size:13px">Previous-year material. ${other?`This semester's counterpart is <a href="#/ch/${other.id}">${esc(other.title)}</a> — open the Compare tab to see what changed.`:"No 2026 counterpart has been uploaded yet; when it arrives it will appear under <em>"+esc(trackName(CUR))+"</em> with a Compare tab."}</p>`:""}
+    <div class="tabs">
+      ${hasLesson?`<button class="disp ${tab==='lesson'?'on':''}" onclick="readerTab='lesson';route()">Lesson & tricks</button>`:""}
+      <button class="disp ${tab==='notes'?'on':''}" onclick="readerTab='notes';route()">Slide notes</button>
+      ${hasFigs?`<button class="disp ${tab==='figs'?'on':''}" onclick="readerTab='figs';route()">Figures (${c.figs.length})</button>`:""}
+      ${hasCmp?`<button class="disp ${tab==='compare'?'on':''}" onclick="readerTab='compare';route()">Compare ⇄ ${esc(opLabel(other))}</button>`:""}
+      ${hasEx?`<button class="disp ${tab==='exercises'?'on':''}" onclick="readerTab='exercises';route()">⌨ Exercises (${c.exercises.filter(e=>exState(exKey(c.id,e.id)).passed).length}/${c.exercises.length})</button>`:""}
+    </div>
+    ${tab==="figs"?figGallery(c)
+      :tab==="compare"?compareView(c,other)
+      :tab==="exercises"?exTab(c)
+      :`<div class="paper">${renderMD(tab==="lesson"?c.lesson:c.md)}</div>`}
+    <div class="actions">
+      ${c.cards.length?`<button class="btn primary" onclick="startQuiz('${c.id}')">Quiz this chapter (${c.cards.length})</button>`:""}
+      <button class="btn" onclick="S.read['${c.id}']=true;save();route()">${S.read[c.id]?"✓ Marked studied":"Mark as studied"}</button>
+    </div>
+    ${padHTML("ch:"+c.id,"chapter "+c.id)}
+    ${titleBlock({SECTION:"OP "+c.id,SHEET:c.slides,CARDS:c.cards.length||"—",["BEST QUIZ"]:S.best[c.id]!=null?S.best[c.id]+"%":"—",STATUS:stampHTML[st]})}
+  `;
+  M.focus();
+}
+
+/* ================= compare (deck diff) ================= */
+const normLine=l=>l.replace(/\s+/g," ").trim().toLowerCase();
+function compareView(c,o){
+  // put this semester's deck on the right, the archive on the left
+  const [L,R]=(c.track||CUR)===CUR?[o,c]:[c,o];
+  const bag=ch=>{const m=new Map();ch.slideText.forEach(sl=>sl.forEach(l=>{const k=normLine(l);if(k.length>2)m.set(k,(m.get(k)||0)+1);}));return m;};
+  const bagL=bag(L),bagR=bag(R);
+  const col=(ch,otherBag,cls)=>{let uniq=0,tot=0;
+    const html=ch.slideText.map((sl,i)=>{const lines=sl.filter(l=>normLine(l).length>2);if(!lines.length)return "";
+      let anyU=false;const body=lines.map(l=>{const k=normLine(l);const common=otherBag.has(k);tot++;if(!common){uniq++;anyU=true;}
+        return `<div class="ln ${common?'':cls}">${esc(l)}</div>`;}).join("");
+      const fig=ch.figs&&ch.figs[i];
+      return `<div class="sl ${anyU?'changed':''}"><div class="n">Slide ${i+1}${fig?` · <a href="${fig.src}" target="_blank" rel="noopener">view</a>`:""}</div>${body}</div>`;}).join("");
+    return {html,uniq,tot};};
+  const cl=col(L,bagR,"del"),cr=col(R,bagL,"add");
+  const same=cl.tot-cl.uniq;
+  return `<div class="cmpsum">
+      <span><b>${L.slideText.length}</b> slides in ${esc(trackName(L.track||CUR))}</span>
+      <span><b>${R.slideText.length}</b> slides in ${esc(trackName(R.track||CUR))}</span>
+      <span><b>${same}</b> of ${cl.tot} lines carried over (${cl.tot?Math.round(same/cl.tot*100):0}%)</span>
+      <span><b>${cl.uniq}</b> lines dropped</span><span><b>${cr.uniq}</b> lines new</span></div>
+    <div class="legend"><span><i style="background:var(--warn-soft);border-left:3px solid var(--warn)"></i>only in ${esc(trackName(L.track||CUR))}</span>
+      <span><i style="background:var(--good-soft);border-left:3px solid var(--good)"></i>only in ${esc(trackName(R.track||CUR))}</span><span>grey = unchanged text · image-only slides show no lines; use the Figures tabs for those</span></div>
+    <div class="cmp">
+      <div><h3>${esc(trackName(L.track||CUR))}<small>${esc(L.title)}</small></h3>${cl.html}</div>
+      <div><h3>${esc(trackName(R.track||CUR))}<small>${esc(R.title)}</small></h3>${cr.html}</div>
+    </div>`;
+}
+
+/* ================= python runtime (Pyodide) ================= */
+const PYVER="0.27.0", PYURL="https://cdn.jsdelivr.net/pyodide/v"+PYVER+"/full/";
+let pyPromise=null, pyOut=[];
+function pyStatus(msg){const e=document.getElementById("exout");if(e){e.className="exout";e.textContent=msg;}}
+function loadPy(){
+  if(pyPromise)return pyPromise;
+  pyPromise=(async()=>{
+    pyStatus("Loading Python… (first time only, ~10 MB — needs internet)");
+    if(!window.loadPyodide){
+      await new Promise((res,rej)=>{const t=document.createElement("script");t.src=PYURL+"pyodide.js";t.onload=res;t.onerror=()=>rej(new Error("Could not download Pyodide. Check your internet connection."));document.head.appendChild(t);});
+    }
+    const py=await window.loadPyodide({indexURL:PYURL});
+    py.setStdout({batched:t=>pyOut.push(t)});
+    py.setStderr({batched:t=>pyOut.push(t)});
+    pyStatus("Loading NumPy…");
+    await py.loadPackage("numpy");
+    return py;
+  })().catch(e=>{pyPromise=null;throw e;});
+  return pyPromise;
+}
+
+/* ================= java runtime (Wandbox: real OpenJDK on a remote sandbox) ================= */
+const JAVA_API="https://wandbox.org/api/compile.json", JAVA_JDK="openjdk-jdk-22+36";
+function javaSource(code,test){
+  // one file, as `java Main.java` would see it: imports first, then the test's Main (made non-public), then the student's classes
+  const imps=new Set(), strip=t=>(t||"").split("\n").filter(l=>{if(/^\s*import\s+[\w.*]+\s*;\s*$/.test(l)){imps.add(l.trim());return false}return true}).join("\n");
+  const c=strip(code), t=strip(test).replace(/public\s+class\s+Main\b/,"class Main");
+  const userMain=/\bclass\s+Main\b/.test(c);
+  const runner=test!=null?t:(userMain?"":'class Main { public static void main(String[] a) { System.out.println("✓ Compiles. Press Check to run the tests."); } }');
+  return [...imps].join("\n")+"\n"+runner+"\n"+c.replace(/public\s+class\s+Main\b/,"class Main")+"\n";
+}
+async function runJava(src,stdin){
+  let last=null;
+  for(let attempt=0;attempt<5;attempt++){
+    try{
+      const r=await fetch(JAVA_API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({compiler:JAVA_JDK,code:src,stdin:stdin||""})});
+      const d=await r.json(); last=d;
+      if(/OCI runtime error|Resource temporarily unavailable/.test(d.compiler_error||"")){await new Promise(z=>setTimeout(z,1500*(attempt+1)));continue;}
+      return d;
+    }catch(e){last={status:"net",compiler_error:"Could not reach the Java compiler service (wandbox.org). Check your internet connection and try again."};await new Promise(z=>setTimeout(z,1200));}
+  }
+  return last;
+}
+function javaReport(d){
+  const out=(d.program_output||"")+(d.program_error?"\n"+d.program_error:"");
+  if(/OCI runtime error|Resource temporarily unavailable/.test(d.compiler_error||""))return {ok:false,text:"The online Java compiler (wandbox.org) is busy right now. Wait a few seconds and press the button again."};
+  if(d.compiler_error&&d.status!=="0")return {ok:false,text:"Compile error:\n\n"+d.compiler_error.replace(/prog\.java/g,"Main.java")};
+  return {ok:d.status==="0"&&!/Exception in thread|AssertionError|Error:/.test(d.program_error||""),text:out||"(no output)"};
+}
+async function runJavaEx(cid,eid,withTests,ex,code,out,st,k){
+  out.textContent="Compiling and running on OpenJDK 22…";
+  const d=await runJava(javaSource(code,withTests?ex.test:null),"");
+  const r=javaReport(d);
+  if(withTests&&r.ok){st.passed=true;S.ex[k]=st;save();out.className="exout pass";out.textContent=r.text+"\n\n✓ All checks passed.";navHTML();return;}
+  if(withTests){st.tried=(st.tried||0)+1;S.ex[k]=st;save();}
+  out.className="exout"+(r.ok?"":" fail"); out.textContent=(withTests&&!r.ok?"✗ Not yet.\n\n":"")+r.text; navHTML();
+}
+/* ================= playground ================= */
+const PLAY_START={java:'import java.util.Scanner;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner in = new Scanner(System.in);\n        String name = in.nextLine();\n        System.out.println("Hello, " + name + "!");\n    }\n}\n',
+  python:'name = input()\nprint(f"Hello, {name}!")\n'};
+function playView(){
+  playInit();
+  const lang=S.play&&S.play.lang||(B.code==="CS105"?"java":"python");
+  const code=S.play&&S.play[lang]!=null?S.play[lang]:PLAY_START[lang];
+  return `<div class="expane"><div class="row" style="display:flex;align-items:baseline;gap:12px"><h3>⌨ Code playground</h3>
+    <select id="plang" onchange="playLang(this.value)"><option value="java" ${lang==="java"?"selected":""}>Java (OpenJDK 22)</option><option value="python" ${lang==="python"?"selected":""}>Python 3 (+NumPy)</option></select></div>
+    <textarea class="exed" id="exed" spellcheck="false" style="min-height:300px">${esc(code)}</textarea>
+    <label class="sub" for="pin">Input (stdin), one line per Scanner/input() read:</label>
+    <textarea class="exed" id="pin" spellcheck="false" style="min-height:60px">${esc(S.play&&S.play.stdin||"World")}</textarea>
+    <div class="exbar"><button class="btn primary" style="margin:0" onclick="playRun()">▶ Run</button>
+      <button class="btn" style="margin:0" onclick="playReset()">Reset</button></div>
+    <div class="exout" id="exout">Press Run.</div>
+    <div class="exnote">${lang==="java"?"Java is compiled and run on a remote OpenJDK sandbox (wandbox.org); your class with main must be called Main.":"Python runs in your browser (Pyodide)."}</div></div>`;
+}
+function playSave(){S.play=S.play||{};const l=S.play.lang||document.getElementById("plang").value;S.play.lang=l;S.play[l]=document.getElementById("exed").value;S.play.stdin=document.getElementById("pin").value;save();}
+function playLang(l){playSave();S.play.lang=l;save();route();}
+function playInit(){S.play=S.play||{};S.play.lang=S.play.lang||(B.code==="CS105"?"java":"python");}
+function playReset(){const l=S.play.lang;document.getElementById("exed").value=PLAY_START[l];playSave();}
+async function playRun(){
+  playSave(); const l=S.play.lang, code=S.play[l], stdin=S.play.stdin||"", out=document.getElementById("exout");
+  out.className="exout"; out.textContent="Running…";
+  if(l==="java"){const r=javaReport(await runJava(javaSource(code,null),stdin));out.className="exout"+(r.ok?"":" fail");out.textContent=r.text;return;}
+  let py; try{py=await loadPy();}catch(e){out.className="exout fail";out.textContent=e.message;return;}
+  pyOut=[]; const lines=stdin.split("\n"); let i=0;
+  py.setStdin({stdin:()=>i<lines.length?lines[i++]:null});
+  const ns=py.toPy({});
+  try{await py.runPythonAsync(code,{globals:ns});out.textContent=pyOut.join("")||"(no output)";}
+  catch(err){out.className="exout fail";out.textContent=(pyOut.join("")?pyOut.join("")+"\n":"")+String(err.message||err).split("\n").filter(x=>!/File \"<exec>\"|pyodide|_pyodide|importlib/.test(x)).slice(-14).join("\n");}
+  finally{try{ns.destroy()}catch(e){}}
+}
+function exOf(cid,eid){const c=byId(cid);return (c.exercises||[]).find(e=>e.id===eid);}
+const exKey=(cid,eid)=>cid+"/"+eid;
+const exState=k=>S.ex[k]||{code:null,passed:false,tried:0};
+async function runEx(cid,eid,withTests){
+  const ex=exOf(cid,eid), k=exKey(cid,eid), out=document.getElementById("exout");
+  const code=document.getElementById("exed").value;
+  const st=exState(k); st.code=code; S.ex[k]=st; save();
+  out.className="exout"; out.textContent="Running…";
+  if(ex.lang==="java")return runJavaEx(cid,eid,withTests,ex,code,out,st,k);
+  let py; try{ py=await loadPy(); }catch(e){ out.className="exout fail"; out.textContent=e.message; return; }
+  pyOut=[];
+  // a fresh namespace per run: stale definitions from an earlier attempt can never make a wrong answer pass,
+  // and because the student's code is executed on its own, error line numbers match what they see in the editor.
+  const ns=py.toPy({});
+  try{
+    await py.runPythonAsync("import numpy as np",{globals:ns});
+    await py.runPythonAsync(code,{globals:ns});
+    if(!withTests){
+      out.className="exout";
+      out.textContent=(pyOut.join("")||"(no output)")+"\n\n— ran your code; press Check to test it against the requirements.";
+      return;
+    }
+    await py.runPythonAsync(ex.test,{globals:ns});
+    st.passed=true; S.ex[k]=st; save();
+    out.className="exout pass";
+    out.textContent=(pyOut.join("")?pyOut.join("")+"\n":"")+"✓ All checks passed.";
+    navHTML();
+  }catch(err){
+    st.tried=(st.tried||0)+1; S.ex[k]=st; save();
+    out.className="exout fail";
+    const msg=String(err.message||err);
+    const lines=msg.split("\n").filter(l=>!/File \"<exec>\"|pyodide|_pyodide|importlib/.test(l));
+    out.textContent=(pyOut.join("")?pyOut.join("")+"\n":"")+(withTests?"✗ Not yet.\n\n":"")+lines.slice(-14).join("\n");
+    navHTML();
+  }finally{ try{ ns.destroy(); }catch(e){} }
+}
+function exReset(cid,eid){const ex=exOf(cid,eid);document.getElementById("exed").value=ex.starter;}
+function exHint(cid,eid){const ex=exOf(cid,eid),o=document.getElementById("exout");o.className="exout";o.textContent="Hint: "+(ex.hint||"(none given)");}
+function exSolution(cid,eid){
+  const ex=exOf(cid,eid);
+  if(!confirm("Show the worked solution? Try the hint first — you learn far more from a failed attempt than a read solution."))return;
+  document.getElementById("exed").value=ex.solution;
+  const o=document.getElementById("exout");o.className="exout";o.textContent="Solution loaded into the editor. Read it, then press Check, then press Reset and write it again from memory.";
+}
+let openEx=null;
+function exOpen(cid,eid){openEx=eid;route();}
+function exClose(){openEx=null;route();}
+function exTab(c){
+  const list=c.exercises||[];
+  if(openEx){
+    const ex=list.find(e=>e.id===openEx)||list[0];
+    const k=exKey(c.id,ex.id), st=exState(k);
+    return `<div class="expane">
+      <div class="row" style="display:flex;align-items:baseline"><h3>${esc(ex.title)}</h3><span class="extag ${ex.level||'core'}">${esc(ex.level||'core')}</span>
+        <span class="exstat">${st.passed?'<span class="ok" style="color:var(--good)">✓ passed</span>':st.tried?st.tried+" attempt"+(st.tried>1?"s":""):""}</span></div>
+      <div class="exprompt">${renderMD(ex.prompt)}</div>
+      <textarea class="exed" id="exed" spellcheck="false">${esc(st.code!=null?st.code:ex.starter)}</textarea>
+      <div class="exbar">
+        <button class="btn primary" style="margin:0" onclick="runEx('${c.id}','${ex.id}',true)">▶ Check</button>
+        <button class="btn" style="margin:0" onclick="runEx('${c.id}','${ex.id}',false)">Run only</button>
+        <button class="btn" style="margin:0" onclick="exHint('${c.id}','${ex.id}')">Hint</button>
+        <button class="btn" style="margin:0" onclick="exReset('${c.id}','${ex.id}')">Reset</button>
+        <button class="btn" style="margin:0" onclick="exSolution('${c.id}','${ex.id}')">Solution</button>
+        <button class="btn" style="margin:0" onclick="exClose()">← All exercises</button>
+      </div>
+      <div class="exout" id="exout">${ex.lang==="java"?"Write your classes above (no <b>public</b> modifier, no <b>Main</b> class — the test is the Main). Press Check to compile and run the tests.":"NumPy is available as <b>np</b>. Press Check to test your answer."}</div>
+      <div class="exnote">${ex.lang==="java"?"Compiled and run on real OpenJDK 22 (wandbox.org sandbox) — it needs internet. Offline: put the test and your code in Main.java and run <code>java Main.java</code>.":"Runs real Python in your browser (Pyodide + NumPy). Training a neural network needs a GPU — those exercises are in the chapter's “Coding practice” section and belong in Colab."}</div>
+    </div>`;
+  }
+  const done=list.filter(e=>exState(exKey(c.id,e.id)).passed).length;
+  return `<p class="sub" style="margin:12px 0 0">${done} of ${list.length} passed. ${list[0]&&list[0].lang==="java"?"Java is compiled and tested online on OpenJDK — no setup, nothing to install.":"Python runs in the browser — no setup, nothing to install."}</p>
+    <div class="exlist">${list.map(e=>{const st=exState(exKey(c.id,e.id));
+      return `<div class="exrow ${st.passed?'done':st.tried?'tried':''}" onclick="exOpen('${c.id}','${e.id}')">
+        <b>${esc(e.title)} <span class="extag ${e.level||'core'}">${esc(e.level||'core')}</span>${st.passed?' <span style="color:var(--good)">✓</span>':''}</b>
+        <small>${esc(e.blurb||"")}</small></div>`;}).join("")}</div>`;
+}
+
+/* ================= quiz engine ================= */
+let Q=null; // {keys, idx, right, revealed, label, chapterId|null}
+function shuffled(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]];}return a;}
+function cardOf(k){const [cid,i]=k.split(":");return byId(cid).cards[+i];}
+function startQuiz(cid){
+  const c=byId(cid);
+  Q={keys:shuffled(c.cards.map((_,i)=>ck(cid,i))),idx:0,right:0,revealed:false,missed:[],
+     label:"OP "+cid+" — "+c.title,chapterId:cid,full:true};
+  location.hash="#/run";
+}
+function startTest(cids,n,src){
+  let pool=src==="weak"?weakKeys():cids.flatMap(cid=>byId(cid).cards.map((_,i)=>ck(cid,i)));
+  if(src==="weak"&&!pool.length){alert("No weak cards yet — run some quizzes first.");return;}
+  pool=shuffled(pool).slice(0,n);
+  Q={keys:pool,idx:0,right:0,revealed:false,missed:[],
+     label:src==="weak"?"Weak-card drill":"Test — "+cids.join(", "),chapterId:null,cids,full:false};
+  location.hash="#/run";
+}
+function runView(){
+  if(!Q){location.hash="#/dash";return;}
+  if(Q.idx>=Q.keys.length){return resultView();}
+  const k=Q.keys[Q.idx], card=cardOf(k), cid=k.split(":")[0];
+  M.innerHTML=topbar+`<div class="qwrap">
+    <div class="qmeta"><span class="disp" style="font-size:11px">${esc(Q.label)}</span>
+      <span class="mono">${Q.idx+1} / ${Q.keys.length}</span></div>
+    <div class="qbar"><i style="width:${Q.idx/Q.keys.length*100}%"></i></div>
+    <div class="qcard">
+      <span class="qlbl">Question · from OP ${cid}</span>
+      <div class="qq">${inline(esc(card.q))}</div>
+      ${Q.revealed?`<div class="qa">${inline(esc(card.a))}</div>`:""}
+    </div>
+    <div class="qbtns">
+      ${Q.revealed
+        ?`<button class="btn good" onclick="answer(true)">✓ I had it</button>
+          <button class="btn bad" onclick="answer(false)">✗ Missed it</button>`
+        :`<button class="btn primary" onclick="Q.revealed=true;route()">Reveal answer</button>`}
+    </div>
+    <p class="kbd"><kbd>space</kbd> reveal · <kbd>1</kbd> had it · <kbd>2</kbd> missed · answer out loud before revealing — retrieval is the workout</p>
+  </div>`;
+}
+function answer(ok){
+  const k=Q.keys[Q.idx];mark(k,ok);
+  if(ok)Q.right++;else Q.missed.push(k);
+  Q.idx++;Q.revealed=false;route();
+}
+function resultView(){
+  const pct=Math.round(Q.right/Q.keys.length*100);
+  if(Q.chapterId&&Q.full&&(S.best[Q.chapterId]==null||pct>S.best[Q.chapterId])){S.best[Q.chapterId]=pct;}
+  if(!Q.chapterId)S.tests.push({date:new Date().toISOString().slice(0,10),label:Q.label,n:Q.keys.length,score:pct});
+  save();
+  M.innerHTML=topbar+`<div class="qwrap" style="text-align:center;padding-top:30px">
+    <div class="eyebrow">${esc(Q.label)}</div>
+    <div class="score-hero" style="color:${pct>=80?"var(--good)":pct>=50?"var(--warn)":"var(--ink)"}">${pct}%</div>
+    <p class="sub">${Q.right} of ${Q.keys.length} correct ${pct>=80?"— stamp earned ✓":pct>=50?"— close; drill the misses":"— reread the chapter, then retry"}</p>
+    ${Q.missed.length?`<div class="missed" style="text-align:left"><strong>Missed (${Q.missed.length}) — now in your weak deck:</strong><ul>${Q.missed.slice(0,12).map(k=>`<li>${inline(esc(cardOf(k).q))}</li>`).join("")}${Q.missed.length>12?"<li>…</li>":""}</ul></div>`:""}
+    <div class="qbtns" style="margin-top:26px">
+      ${Q.missed.length?`<button class="btn primary" onclick="retryMissed()">Drill the ${Q.missed.length} missed now</button>`:""}
+      ${Q.chapterId?`<button class="btn" onclick="startQuiz('${Q.chapterId}')">Retake full quiz</button>`:""}
+      <button class="btn" onclick="Q=null;location.hash='#/dash'">Back to dashboard</button>
+    </div></div>`;
+  navHTML();
+}
+function retryMissed(){
+  Q={keys:shuffled(Q.missed),idx:0,right:0,revealed:false,missed:[],label:"Drill — missed cards",chapterId:null,full:false};
+  route();
+}
+document.addEventListener("keydown",e=>{
+  if(e.key==="Tab"&&e.target&&e.target.id==="exed"){
+    e.preventDefault();const t=e.target,s0=t.selectionStart,s1=t.selectionEnd;
+    t.value=t.value.slice(0,s0)+"    "+t.value.slice(s1);t.selectionStart=t.selectionEnd=s0+4;return;
+  }
+  if(!Q||location.hash!=="#/run"||Q.idx>=Q.keys.length)return;
+  if(e.key===" "&&!Q.revealed){e.preventDefault();Q.revealed=true;route();}
+  else if(Q.revealed&&(e.key==="1"))answer(true);
+  else if(Q.revealed&&(e.key==="2"))answer(false);
+});
+
+/* ================= test bench ================= */
+let sel=new Set(CH.filter(c=>c.cards.length&&(c.track||CUR)===CUR).slice(0,2).map(c=>c.id));
+function testView(){
+  M.innerHTML=topbar+`
+    <div class="eyebrow">Inspection bench</div><h1 class="disp">Test Bench</h1>
+    <p class="sub">Mixed test across chapters — like the real quiz/exam, questions arrive shuffled and unlabeled by topic.</p>
+    <h2 class="disp">Pick chapters</h2>
+    ${TRACKS.map(t=>`${TRACKS.length>1?`<div class="eyebrow" style="margin-top:8px">${esc(trackName(t))}</div>`:""}<div class="chips">${CH.filter(c=>c.cards.length&&(c.track||CUR)===t).map(c=>
+      `<button class="chip ${sel.has(c.id)?'on':''}" onclick="tog('${c.id}')">${esc(opLabel(c))} · ${c.title}</button>`).join("")}</div>`).join("")}
+    <div class="actions" style="align-items:center">
+      <label>Questions <select id="tn"><option>10</option><option selected>20</option><option>40</option></select></label>
+      <button class="btn primary" onclick="startTest([...sel],+document.getElementById('tn').value,'all')">Start test</button>
+      <button class="btn" onclick="startTest([],40,'weak')">⚑ Drill weak deck (${weakKeys().length})</button>
+    </div>
+    <h2 class="disp">Test history</h2>
+    ${S.tests.length?`<table class="traveler hist"><tr><th>Date</th><th>Test</th><th>Qs</th><th>Score</th></tr>
+      ${S.tests.slice().reverse().map(t=>`<tr><td class="mono">${t.date}</td><td>${esc(t.label)}</td><td>${t.n}</td>
+      <td class="mono" style="color:${t.score>=80?"var(--good)":"inherit"}">${t.score}%</td></tr>`).join("")}</table>`
+      :`<p class="sub">No tests yet. ${B.testHint||"Pick chapters above and run one."}</p>`}
+    ${titleBlock({SECTION:"BENCH",SHEET:"mixed tests",REV:S.tests.length+" runs",CHECKED:S.tests.length?Math.round(S.tests.reduce((s,t)=>s+t.score,0)/S.tests.length)+"% avg":"—"})}`;
+}
+function tog(id){sel.has(id)?sel.delete(id):sel.add(id);route();}
+function weakView(){
+  const wk=weakKeys();
+  M.innerHTML=topbar+`<div class="eyebrow">Rework queue</div><h1 class="disp">Weak Cards</h1>
+    <p class="sub">Cards you've missed and not yet answered correctly twice in a row. Clear the queue before every exam.</p>
+    <div class="actions">${wk.length?`<button class="btn primary" onclick="startTest([],${wk.length},'weak')">Drill all ${wk.length}</button>`:""}</div>
+    ${wk.length?`<table class="traveler"><tr><th>Op</th><th>Question</th><th>Record</th></tr>${wk.map(k=>{const s=stat(k);
+      return `<tr onclick="startQuiz('${k.split(":")[0]}')"><td class="mono opno">${k.split(":")[0]}</td><td>${inline(esc(cardOf(k).q))}</td><td class="mono opno">${s.r}✓ ${s.w}✗</td></tr>`;}).join("")}</table>`
+      :`<p class="sub">Queue is empty — nothing marked weak right now. ✓</p>`}`;
+}
+function delivView(i){
+  const d=C.deliverables[+i]; if(!d){location.hash="#/dash";return;}
+  M.innerHTML=topbar+`<div class="eyebrow">Deliverable</div><h1 class="disp" style="font-size:24px">${esc(d.title)}</h1>
+    <div class="paper" style="border-top:1px solid var(--line);margin-top:14px">${renderMD(d.md)}</div>
+    ${padHTML("deliv:"+d.id,"this deliverable")}`;
+}
+
+/* ================= router ================= */
+function route(){
+  const h=location.hash||"#/dash";
+  const [,view,arg,sub]=h.split("/");
+  if(sub==="figs"||sub==="notes"||sub==="lesson"||sub==="compare"||sub==="exercises")readerTab=sub;
+  if(view==="ch")chView(arg);
+  else if(view==="run")runView();
+  else if(view==="test")testView();
+  else if(view==="weak")weakView();
+  else if(view==="deliv")delivView(arg);
+  else if(view==="play")M.innerHTML=topbar+playView();
+  else dashView();
+  navHTML();
+  if(view!=="run")window.scrollTo(0,0);
+}
+addEventListener("hashchange",route);
+route();
+</script>
+</body>
+</html>
