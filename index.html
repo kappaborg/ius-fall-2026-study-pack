@@ -57,6 +57,15 @@ h1{font-family:var(--display);font-stretch:80%;font-weight:800;font-size:clamp(3
 .ig{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(45deg,#F58529,#DD2A7B,#8134AF);color:#fff;text-decoration:none;font-family:var(--display);font-weight:700;font-size:15px;padding:11px 18px;border-radius:999px;white-space:nowrap}
 .ig:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
 .ig svg{width:18px;height:18px}
+.hot{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;align-items:center;margin:0 0 22px;padding:16px 18px;border-radius:12px;
+  background:linear-gradient(120deg,#D9480F,#B5179E);color:#fff;text-decoration:none;box-shadow:0 6px 18px rgba(217,72,15,.25)}
+.hot .k{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.9}
+.hot h2{font-family:var(--display);font-stretch:85%;font-weight:800;font-size:24px;margin:2px 0 4px;color:#fff}
+.hot p{margin:0;font-size:14.5px;opacity:.95;max-width:56ch}
+.hot .go2{font-family:var(--display);font-weight:800;background:#fff;color:#B5179E;border-radius:999px;padding:10px 16px;white-space:nowrap}
+.hot:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+@media (max-width:560px){.hot{grid-template-columns:minmax(0,1fr)}.hot .go2{justify-self:start}}
+@media (prefers-reduced-motion:no-preference){.hot .go2{animation:pulse 2.2s ease-in-out infinite}@keyframes pulse{50%{transform:scale(1.05)}}}
 </style></head><body>
 
 <div class="wrap">
@@ -67,6 +76,10 @@ h1{font-family:var(--display);font-stretch:80%;font-weight:800;font-size:clamp(3
     <p class="lede">Condensed notes, flashcards, the lecture slides and a click-to-answer Quiz Trainer for five courses. Open a course, read a chapter, then quiz it. Your progress stays in your own browser.</p>
   </header>
 
+  <a class="hot" href="CS313/mock.html">
+    <div><div class="k">🔥 CS313 midterm is tomorrow</div><h2>Take the mock midterm</h2>
+      <p>21 questions in the real 5-part format: sets, proofs, NFA → DFA with ε-closure diagrams, regex, pumping lemma. A 90-minute timer, a reveal button for every answer, and your score as you mark yourself.</p></div>
+    <span class="go2">Start →</span></a>
   <ul class="board">
     <li class="row"><div class="gate">CS105</div><div><h2>Advanced Programming (Java)</h2><p class="meta">Dr. K. Oladejo · Savitch, <i>Absolute Java</i> · weeks 1–7</p>
       <div class="tags"><span>18 chapters</span><span>264 quiz questions</span><span>Java exercises with tests</span></div></div>
