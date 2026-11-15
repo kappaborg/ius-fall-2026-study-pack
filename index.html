@@ -89,7 +89,7 @@ h1{font-family:var(--display);font-stretch:80%;font-weight:800;font-size:clamp(3
 
 <script>
 // Lecture PDFs live in Supabase Storage (bucket "lecture-pdfs"); the catalogue is the public.materials table (read-only anon key).
-const SB_URL="__SB_URL__", SB_ANON="__SB_ANON__";
+const SB_URL="https://nkztuwugfppthefuvtdh.supabase.co", SB_ANON="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5renR1d3VnZnBwdGhlZnV2dGRoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ3NDAzMjEsImV4cCI6MjExMDMxNjMyMX0.Ox5MReU5jrsRbgRnK4c2WDvDhSbIjJQCUoKKg9wxTTY";
 (async()=>{
   const st=document.getElementById("matStatus"), box=document.getElementById("matList");
   const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
