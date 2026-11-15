@@ -36,6 +36,17 @@ h1{font-family:var(--display);font-stretch:80%;font-weight:800;font-size:clamp(3
   .gate{border-right:0;padding-right:0}
   .go{justify-self:start}
 }
+.mat{margin-top:34px}
+.mat h2{font-family:var(--display);font-stretch:85%;font-weight:800;font-size:26px;margin:0 0 6px}
+.mat details{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-top:10px}
+.mat summary{cursor:pointer;font-family:var(--display);font-weight:700}
+.mat summary .gate2{font-family:var(--mono);color:var(--accent);margin-right:8px}
+.mat ul{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:4px}
+.mat li{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;font-size:14.5px}
+.mat li a{color:var(--accent);font-weight:600}
+.mat .wk{font-family:var(--mono);font-size:11.5px;color:var(--muted);min-width:64px}
+.mat .sz{font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+.mat .status{font-size:14px;color:var(--muted)}
 </style></head><body>
 
 <div class="wrap">
@@ -63,6 +74,12 @@ h1{font-family:var(--display);font-stretch:80%;font-weight:800;font-size:clamp(3
       <a class="go" href="IE408/index.html">Open →</a></li>
   </ul>
 
+
+  <section class="mat" id="materials">
+    <h2>Lecture PDFs</h2>
+    <p class="status" id="matStatus">Loading the list of lecture files…</p>
+    <div id="matList"></div>
+  </section>
   <div class="notes">
     <p><b>Textbooks are not included.</b> The notes summarise the books, but the book pages themselves are left out. Use your own copy.</p>
     <p><b>Check against the official course pages.</b> The notes are a study aid written from the slides. Exam dates and grading come from the lecturers and e-campus.</p>
@@ -70,4 +87,21 @@ h1{font-family:var(--display);font-stretch:80%;font-weight:800;font-size:clamp(3
   </div>
 </div>
 
+<script>
+// Lecture PDFs live in Supabase Storage (bucket "lecture-pdfs"); the catalogue is the public.materials table (read-only anon key).
+const SB_URL="__SB_URL__", SB_ANON="__SB_ANON__";
+(async()=>{
+  const st=document.getElementById("matStatus"), box=document.getElementById("matList");
+  const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  try{
+    const r=await fetch(SB_URL+"/rest/v1/materials?select=course,title,kind,week,url,bytes&order=sort",{headers:{apikey:SB_ANON,Authorization:"Bearer "+SB_ANON}});
+    if(!r.ok)throw new Error("HTTP "+r.status);
+    const rows=await r.json(), by={};
+    rows.forEach(m=>(by[m.course]=by[m.course]||[]).push(m));
+    box.innerHTML=Object.keys(by).map(c=>`<details><summary><span class="gate2">${esc(c)}</span>${by[c].length} files</summary><ul>${
+      by[c].map(m=>`<li><span class="wk">${esc(m.week||"")}</span><a href="${esc(m.url)}" target="_blank" rel="noopener">${esc(m.title)}</a><span class="sz">PDF · ${(m.bytes/1e6).toFixed(1)} MB</span></li>`).join("")}</ul></details>`).join("");
+    st.textContent=rows.length+" files from the lecturers, opened straight from the course storage. Textbooks are not included.";
+  }catch(e){st.textContent="The lecture file list could not be loaded right now. The study sites above still work.";}
+})();
+</script>
 </body></html>
