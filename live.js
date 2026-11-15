@@ -11,7 +11,7 @@
     var b = document.getElementById("liveBadge");
     if (!b) {
       b = document.createElement("div"); b.id = "liveBadge"; b.setAttribute("aria-live", "polite");
-      b.style.cssText = "position:fixed;bottom:calc(58px + env(safe-area-inset-bottom,0px));left:14px;z-index:60;" +
+      b.style.cssText = "position:fixed;bottom:calc(60px + env(safe-area-inset-bottom,0px));left:14px;z-index:60;" +
         "background:rgba(16,22,29,.86);color:#fff;font:600 12px system-ui,sans-serif;padding:5px 10px;border-radius:999px;" +
         "display:flex;gap:6px;align-items:center;pointer-events:none";
       if (!document.getElementById("liveInline")) document.body.appendChild(b);
