@@ -529,17 +529,43 @@ function javaSource(code,test){
   const runner=test!=null?t:(userMain?"":'class Main { public static void main(String[] a) { System.out.println("✓ Compiles. Press Check to run the tests."); } }');
   return [...imps].join("\n")+"\n"+runner+"\n"+c.replace(/public\s+class\s+Main\b/,"class Main")+"\n";
 }
-async function runJava(src,stdin){
+/* Fallback when Wandbox is busy, blocked or unreachable: compile and run inside the browser with CheerpJ (a JVM in
+   WebAssembly, Java 17 runtime) + the Eclipse compiler ecj at Java 8 language level against the Java 17 API.
+   Needs /lib/ecj.jar and /lib/java17-api.jar next to the course folders. Built with CheerpJ (community licence). */
+let cjFrame=null;
+function siteBase(){return location.pathname.replace(/[^/]*$/,"").replace(/[^/]+\/$/,"");}
+function cjRunner(){
+  // CheerpJ runs in its own hidden iframe (lib/java-runner.html) so its globals can't clash with this page's
+  if(cjFrame)return cjFrame;
+  cjFrame=new Promise((res,rej)=>{
+    if(location.protocol==="file:")return rej(new Error("The in-browser Java runtime needs the site to be served over http(s)."));
+    const f=document.createElement("iframe"); f.src=siteBase()+"lib/java-runner.html"; f.style.display="none"; f.title="Java runner";
+    const tm=setTimeout(()=>rej(new Error("The in-browser Java runtime did not load.")),60000);
+    f.onload=()=>{clearTimeout(tm);f.contentWindow.compileRun?res(f.contentWindow):rej(new Error("The in-browser Java runtime is not available on this copy of the site."));};
+    document.body.appendChild(f);
+  }).catch(e=>{cjFrame=null;throw e;});
+  return cjFrame;
+}
+async function runJavaLocal(src){
+  try{const w=await cjRunner();return await w.compileRun(src);}catch(e){return {status:"net",compiler_error:e.message};}
+}
+async function runJava(src,stdin,note){
   let last=null;
-  for(let attempt=0;attempt<5;attempt++){
+  for(let attempt=0;attempt<2;attempt++){
     try{
-      const r=await fetch(JAVA_API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({compiler:JAVA_JDK,code:src,stdin:stdin||""})});
+      const ctl=new AbortController(), tm=setTimeout(()=>ctl.abort(),20000);
+      const r=await fetch(JAVA_API,{method:"POST",signal:ctl.signal,headers:{"Content-Type":"application/json"},body:JSON.stringify({compiler:JAVA_JDK,code:src,stdin:stdin||""})});
+      clearTimeout(tm);
+      if(!r.ok){last={status:"http"+r.status};break;}
       const d=await r.json(); last=d;
-      if(/OCI runtime error|Resource temporarily unavailable/.test(d.compiler_error||"")){await new Promise(z=>setTimeout(z,1500*(attempt+1)));continue;}
+      if(/OCI runtime error|Resource temporarily unavailable/.test(d.compiler_error||"")){await new Promise(z=>setTimeout(z,1500));continue;}
       return d;
-    }catch(e){last={status:"net",compiler_error:"Could not reach the Java compiler service (wandbox.org). Check your internet connection and try again."};await new Promise(z=>setTimeout(z,1200));}
+    }catch(e){last={status:"net"};}
   }
-  return last;
+  if(note)note("The online compiler is busy or unreachable — compiling inside your browser instead (the first run takes about 20 seconds)…");
+  const d=await runJavaLocal(src);
+  if(d.status==="0"&&stdin&&stdin.trim())d.program_output+="\n(Note: keyboard input isn't available in the in-browser runtime.)";
+  return d;
 }
 function javaReport(d){
   const out=(d.program_output||"")+(d.program_error?"\n"+d.program_error:"");
@@ -549,10 +575,11 @@ function javaReport(d){
 }
 async function runJavaEx(cid,eid,withTests,ex,code,out,st,k){
   out.textContent="Compiling and running on OpenJDK 22…";
-  const d=await runJava(javaSource(code,withTests?ex.test:null),"");
+  const d=await runJava(javaSource(code,withTests?ex.test:null),"",m=>{out.textContent=m;});
   const r=javaReport(d);
   if(withTests&&r.ok){st.passed=true;S.ex[k]=st;save();out.className="exout pass";out.textContent=r.text+"\n\n✓ All checks passed.";navHTML();return;}
   if(withTests){st.tried=(st.tried||0)+1;S.ex[k]=st;save();}
+  if(d.local&&!r.ok&&/File|Writer|append|Stream/i.test(ex.test||""))r.text+="\n\n(This ran in the in-browser fallback, which can't append to files. If a file test fails here, press Check again in a minute when the online compiler is back.)";
   out.className="exout"+(r.ok?"":" fail"); out.textContent=(withTests&&!r.ok?"✗ Not yet.\n\n":"")+r.text; navHTML();
 }
 /* ================= playground ================= */
@@ -570,7 +597,7 @@ function playView(){
     <div class="exbar"><button class="btn primary" style="margin:0" onclick="playRun()">▶ Run</button>
       <button class="btn" style="margin:0" onclick="playReset()">Reset</button></div>
     <div class="exout" id="exout">Press Run.</div>
-    <div class="exnote">${lang==="java"?"Java is compiled and run on a remote OpenJDK sandbox (wandbox.org); your class with main must be called Main.":"Python runs in your browser (Pyodide)."}</div></div>`;
+    <div class="exnote">${lang==="java"?"Java is compiled and run on OpenJDK (wandbox.org), with an in-browser fallback (Built with CheerpJ); your class with main must be called Main.":"Python runs in your browser (Pyodide)."}</div></div>`;
 }
 function playSave(){S.play=S.play||{};const l=S.play.lang||document.getElementById("plang").value;S.play.lang=l;S.play[l]=document.getElementById("exed").value;S.play.stdin=document.getElementById("pin").value;save();}
 function playLang(l){playSave();S.play.lang=l;save();route();}
@@ -579,7 +606,7 @@ function playReset(){const l=S.play.lang;document.getElementById("exed").value=P
 async function playRun(){
   playSave(); const l=S.play.lang, code=S.play[l], stdin=S.play.stdin||"", out=document.getElementById("exout");
   out.className="exout"; out.textContent="Running…";
-  if(l==="java"){const r=javaReport(await runJava(javaSource(code,null),stdin));out.className="exout"+(r.ok?"":" fail");out.textContent=r.text;return;}
+  if(l==="java"){const r=javaReport(await runJava(javaSource(code,null),stdin,m=>{out.textContent=m;}));out.className="exout"+(r.ok?"":" fail");out.textContent=r.text;return;}
   let py; try{py=await loadPy();}catch(e){out.className="exout fail";out.textContent=e.message;return;}
   pyOut=[]; const lines=stdin.split("\n"); let i=0;
   py.setStdin({stdin:()=>i<lines.length?lines[i++]:null});
@@ -654,7 +681,7 @@ function exTab(c){
         <button class="btn" style="margin:0" onclick="exClose()">← All exercises</button>
       </div>
       <div class="exout" id="exout">${ex.lang==="java"?"Write your classes above (no <b>public</b> modifier, no <b>Main</b> class — the test is the Main). Press Check to compile and run the tests.":"NumPy is available as <b>np</b>. Press Check to test your answer."}</div>
-      <div class="exnote">${ex.lang==="java"?"Compiled and run on real OpenJDK 22 (wandbox.org sandbox) — it needs internet. Offline: put the test and your code in Main.java and run <code>java Main.java</code>.":"Runs real Python in your browser (Pyodide + NumPy). Training a neural network needs a GPU — those exercises are in the chapter's “Coding practice” section and belong in Colab."}</div>
+      <div class="exnote">${ex.lang==="java"?"Compiled and run on real OpenJDK 22 (wandbox.org); if that service is busy, the page compiles inside your browser instead (Built with CheerpJ). Offline: put the test and your code in Main.java and run <code>java Main.java</code>.":"Runs real Python in your browser (Pyodide + NumPy). Training a neural network needs a GPU — those exercises are in the chapter's “Coding practice” section and belong in Colab."}</div>
     </div>`;
   }
   const done=list.filter(e=>exState(exKey(c.id,e.id)).passed).length;

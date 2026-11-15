@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="robots" content="noindex">
+<title>Java runner</title>
+<!-- Isolated page (loaded in a hidden iframe by the study site) that compiles and runs Java in the browser:
+     CheerpJ (Java 17 JVM in WebAssembly, community licence — Built with CheerpJ) + Eclipse ecj at Java 8 language level
+     against the Java 17 API (java17-api.jar). Kept separate so CheerpJ's globals can't clash with the site's. -->
+<script src="https://cjrtnc.leaningtech.com/4.2/loader.js"></script>
+</head><body><pre id="console"></pre>
+<script>
+const LIB = "/app" + location.pathname.replace(/[^/]*$/, "");
+let ready = null, n = 0, queue = Promise.resolve();
+function init(){ return ready || (ready = cheerpjInit({version: 17, status: "none", javaProperties: ["user.dir=/files"]})); }
+async function once(src){
+  await init();
+  const C = document.getElementById("console"), k = ++n;
+  cheerpOSAddStringFile("/str/Main" + k + ".java", src);
+  C.textContent = "";
+  const rc = await cheerpjRunMain("org.eclipse.jdt.internal.compiler.batch.Main", LIB + "ecj.jar", "-1.8",
+    "-bootclasspath", LIB + "java17-api.jar", "-proc:none", "-nowarn", "-d", "/files/r" + k, "/str/Main" + k + ".java");
+  if (rc !== 0) return {status: "1", compiler_error: (C.textContent || "Compile failed.").replace(/\/str\/Main\d+\.java/g, "Main.java")};
+  C.textContent = "";
+  const rc2 = await cheerpjRunMain("Main", "/files/r" + k);
+  const out = C.textContent;
+  // CheerpJ can return exit code 0 after an uncaught exception, so the output decides too
+  const failed = rc2 !== 0 || /Exception in thread/.test(out);
+  return {status: failed ? "1" : "0", program_output: out, program_error: "", local: true};
+}
+// one program at a time — the JVM's console element is shared
+window.compileRun = src => (queue = queue.then(() => once(src), () => once(src)));
+window.warmUp = () => init();
+</script></body></html>
